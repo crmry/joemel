@@ -6,7 +6,7 @@
   <meta name="color-scheme" content="light">
   <title>BAC | PR Auto-Formatter</title>
   <link rel="stylesheet" href="./styles.css">
-  <script src="./app.js?v=1.1.2" defer></script>
+  <script src="./app.js?v=1.2.0" defer></script>
 </head>
 <body>
   <main class="wrap">
@@ -34,6 +34,40 @@
           <select id="color-mode"><option value="live">Live colors (update in Excel)</option><option value="static">Mac compatibility (static colors)</option></select>
         </label>
       </div>
+      <fieldset class="page-settings">
+        <legend>Page Setup</legend>
+        <div class="options">
+          <label>Scaling
+            <select id="scaling">
+              <option value="fit" selected>Fit to 1 page wide, automatic height</option>
+              <option value="adjust">Adjust to a percentage</option>
+            </select>
+          </label>
+          <label id="scale-percent-wrap" hidden>Scaling percentage
+            <input id="scale-percent" type="number" min="10" max="400" step="5" value="70" inputmode="numeric">
+          </label>
+          <label>Orientation
+            <select id="orientation">
+              <option value="landscape" selected>Landscape</option>
+              <option value="portrait">Portrait</option>
+            </select>
+          </label>
+          <label>Header
+            <select id="header">
+              <option value="original" selected>Keep original</option>
+              <option value="none">None</option>
+            </select>
+          </label>
+          <label>Footer
+            <select id="footer">
+              <option value="original" selected>Keep original</option>
+              <option value="none">None</option>
+              <option value="page">Page X of Y (centered)</option>
+            </select>
+          </label>
+        </div>
+        <p class="page-hint">To match Excel's Adjust to 70% setting, choose Adjust to a percentage and enter 70. The original page-number footer is kept unless you select None.</p>
+      </fieldset>
       <button id="process" disabled>Reprocess selected workbooks</button>
       <progress id="meter" value="0" max="100" hidden></progress>
       <div id="status" class="status" role="status" aria-live="polite"></div>
