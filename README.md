@@ -10,7 +10,7 @@ The homepage opens the formatter directly at https://crmry.github.io/joemel/form
 
 1. Drop one or more BAC abstract-of-bids `.xlsx` workbooks into the page.
 2. Keep **Auto detect** to infer Line vs Lot Bid from workbook evidence, or explicitly select Line Bid or Lot Bid when the bidding documents require it.
-3. Keep the original paper size (recommended), or select a print paper size.
+3. **Folio** is the default paper size. You can change it to Keep original, Legal, A4, or Letter.
 4. Choose a color mode:
    - **Live colors:** uses Excel conditional formatting so colors update when bid amounts change. Some Excel for Mac installations may display conditional fills incorrectly.
    - **Mac compatibility (static colors):** writes visible Excel fill colors directly, avoiding conditional-fill rendering issues. Re-run conversion after changes to amounts because colors will not update automatically.
