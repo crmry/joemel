@@ -46,3 +46,17 @@ The project URL will be `https://crmry.github.io/joemel/`.
 ## Scope
 
 The tool is a workbook-evidence checker. It does not replace approved bidding documents, BAC resolutions, or applicable procurement rules.
+
+## Color & Page Setup Fixer
+
+The same GitHub Pages website also provides the [BAC Color & Page Setup Fixer](https://crmry.github.io/joemel/formatter/).
+
+- Drop one or more BAC abstract-of-bids `.xlsx` workbooks.
+- Select **Auto detect**, or override the bidding classification as **Line Bid** or **Lot Bid** when documentary evidence requires it.
+- Choose **Keep original** paper size (recommended) or a specific paper size.
+- Click **Format & Download**. One file downloads as a formatted workbook; multiple files download as a ZIP with a processing report.
+- The formatter preserves cell values and formulas, sets print area and landscape one-page-wide scaling, and writes live legend-based conditional formatting (1st, 2nd, 3rd, Above ABC).
+
+All processing happens in the browser. Excel files are never sent to GitHub Pages or stored on a server. The Excel ZIP library and editing engine load only when conversion is requested.
+
+The browser formatter is maintained in `src/formatter/`, with the corresponding deployable copy in `docs/formatter/`. The existing build script copies `src` to `docs`. The engine is designed for these BAC comparison templates, not arbitrary spreadsheet layouts. Automatic classification of PR 10 and above is inferred from workbook evidence and should be checked against official bid documents.
