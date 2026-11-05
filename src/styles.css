@@ -118,7 +118,7 @@ main { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
 .method-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
 .method-dot.line { background: var(--green); }
 .method-dot.lot { background: var(--blue); }
-.method-dot.grouped { background: var(--orange); }
+.method-dot.review { background: var(--red); }
 
 .upload-card {
   overflow: hidden;
@@ -163,13 +163,12 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 .results-heading h2 { margin: 0; color: var(--navy); font-size: 1.8rem; }
 .actions { display: flex; gap: 8px; }
 
-.summary-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px; }
+.summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px; }
 .summary-card { min-height: 100px; padding: 16px; border: 1px solid var(--line); border-top: 4px solid #8095a8; border-radius: 12px; background: white; }
 .summary-card span { display: block; min-height: 40px; color: var(--muted); font-size: .84rem; }
 .summary-card strong { color: var(--navy); font-size: 1.7rem; }
 .summary-card.line-bid { border-top-color: var(--green); }
 .summary-card.lot-bid { border-top-color: var(--blue); }
-.summary-card.grouped-section-bid { border-top-color: var(--orange); }
 .summary-card.needs-review { border-top-color: var(--red); }
 
 .filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
@@ -189,7 +188,6 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 .badge { display: inline-block; padding: 5px 9px; border-radius: 999px; font-size: .78rem; font-weight: 800; white-space: nowrap; }
 .badge.line-bid { background: var(--green-soft); color: var(--green); }
 .badge.lot-bid { background: var(--blue-soft); color: var(--blue); }
-.badge.grouped-section-bid { background: var(--orange-soft); color: var(--orange); }
 .badge.needs-review { background: var(--red-soft); color: var(--red); }
 .details-button { padding: 6px 9px; border: 1px solid var(--line); background: white; color: var(--blue); white-space: nowrap; }
 .details-row td { padding: 0; background: #f8fafc; }

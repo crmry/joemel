@@ -40,7 +40,7 @@ function formatCurrency(value) {
 }
 
 function renderSummary() {
-  const classifications = ["Line Bid", "Lot Bid", "Grouped/Section Bid", "Needs Review"];
+  const classifications = ["Line Bid", "Lot Bid", "Needs Review"];
   elements.summary.innerHTML = [
     { label: "Workbooks", value: state.results.length, className: "total" },
     ...classifications.map((classification) => ({

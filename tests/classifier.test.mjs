@@ -16,7 +16,7 @@ test("cell-column helpers support single and multi-letter references", () => {
 
 test("the first nine BAC workbooks match the evidence-based classifications", async () => {
   const expected = new Map([
-    [1, "Grouped/Section Bid"],
+    [1, "Line Bid"],
     [2, "Line Bid"],
     [3, "Line Bid"],
     [4, "Line Bid"],
@@ -37,6 +37,15 @@ test("the first nine BAC workbooks match the evidence-based classifications", as
     assert.equal(result.confidence, "High", fileName);
     assert.ok(result.evidenceCells.length > 0, fileName);
   }
+});
+
+test("PR 1 treats section subtotals as supporting evidence for a line bid", async () => {
+  const fileName = (await readdir(workbookDirectory)).find((name) => name.startsWith("1)"));
+  const input = await readFile(resolve(workbookDirectory, fileName));
+  const result = await classifyWorkbook(input, fileName, JSZip);
+  assert.equal(result.classification, "Line Bid");
+  assert.deepEqual(result.evidenceCells.sort(), ["G20", "G24", "I20", "I24"]);
+  assert.match(result.reason, /supporting section subtotal rows 20, 24/i);
 });
 
 test("PR 9 exposes aggregate ranking evidence in row 24", async () => {

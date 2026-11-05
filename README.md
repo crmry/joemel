@@ -4,16 +4,14 @@ A browser-only GitHub Pages tool that classifies BAC abstract-of-bids Excel work
 
 - Line Bid
 - Lot Bid
-- Grouped/Section Bid
 - Needs Review
 
 The analyzer reads the workbook locally in the visitor's browser. It does not upload workbook data to a server.
 
 ## How the classification works
 
-- **Line Bid:** ranking colors occur on individual item rows.
-- **Lot Bid:** ranking colors occur only on the final aggregate bidder totals.
-- **Grouped/Section Bid:** ranking colors occur on intermediate subtotal rows.
+- **Line Bid:** ranking evidence occurs on numbered item lines or supporting section subtotals, without one ranked total for the complete PR.
+- **Lot Bid:** ranking colors occur only on one final aggregate bidder-total row covering the complete item schedule.
 - **Needs Review:** evidence is absent, conflicting, or does not match the supported BAC workbook structure.
 
 Each result includes the exact ranked cells, formula, supplier name, and cached calculated value.
@@ -27,8 +25,7 @@ npm run verify
 
 The regression tests use the BAC workbooks in `/Users/crimary/Documents/BAC/October 8, 2026 Abstract of Bids PB 02-2027_edited` and expect:
 
-- PR 1: Grouped/Section Bid
-- PR 2–8: Line Bid
+- PR 1–8: Line Bid
 - PR 9: Lot Bid
 
 ## GitHub Pages

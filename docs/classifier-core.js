@@ -212,6 +212,20 @@ function rankOrder(rank) {
   return { "1st": 1, "2nd": 2, "3rd": 3, "Above ABC": 4 }[rank] || 99;
 }
 
+function formulaCoversItemRange(formula, column, minItemRow, maxItemRow) {
+  if (!formula) return false;
+  const columnName = columnLetters(column);
+  const escapedColumn = columnName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const rangePattern = new RegExp(`\\$?${escapedColumn}\\$?(\\d+)\\s*:\\s*\\$?${escapedColumn}\\$?(\\d+)`, "gi");
+  let match;
+  while ((match = rangePattern.exec(formula)) !== null) {
+    const startRow = Number.parseInt(match[1], 10);
+    const endRow = Number.parseInt(match[2], 10);
+    if (startRow <= minItemRow && endRow >= maxItemRow) return true;
+  }
+  return false;
+}
+
 function analyzeSheet({ cells, sheetName, fileName }) {
   const headerRow = findHeaderRow(cells);
   if (!headerRow) throw new Error("Could not locate the Item / Agency-ABC / Total Cost header structure.");
@@ -249,6 +263,7 @@ function analyzeSheet({ cells, sheetName, fileName }) {
       rankCells.push({
         reference: cell.reference,
         row,
+        column,
         rank,
         formula: cell.formula,
         value: typeof cell.value === "number" ? cell.value : null,
@@ -258,30 +273,31 @@ function analyzeSheet({ cells, sheetName, fileName }) {
   }
 
   const itemRanks = rankCells.filter((cell) => itemRowSet.has(cell.row));
-  const groupedRanks = rankCells.filter((cell) => !itemRowSet.has(cell.row));
-  const groupedRows = [...new Set(groupedRanks.map((cell) => cell.row))].sort((a, b) => a - b);
+  const subtotalRanks = rankCells.filter((cell) => !itemRowSet.has(cell.row));
+  const subtotalRows = [...new Set(subtotalRanks.map((cell) => cell.row))].sort((a, b) => a - b);
   let classification = "Needs Review";
   let reason = "No ranking-color evidence was found in the bidder total columns.";
   let confidence = "Low";
 
-  if (itemRanks.length > 0 && groupedRanks.length === 0) {
-    classification = "Line Bid";
-    reason = `Ranking colors are applied to calculated bidder totals on ${new Set(itemRanks.map((cell) => cell.row)).size} individual item row(s).`;
+  const oneFinalAggregateRow = itemRanks.length === 0
+    && subtotalRows.length === 1
+    && subtotalRows[0] > maxItemRow
+    && subtotalRanks.every((cell) => formulaCoversItemRange(cell.formula, cell.column, minItemRow, maxItemRow));
+
+  if (oneFinalAggregateRow) {
+    classification = "Lot Bid";
+    reason = `Ranking colors appear only on the final aggregate bidder totals in row ${subtotalRows[0]}, covering the complete item schedule.`;
     confidence = legend.found >= 3 ? "High" : "Medium";
-  } else if (itemRanks.length === 0 && groupedRanks.length > 0) {
-    const oneFinalRow = groupedRows.length === 1 && groupedRows[0] > maxItemRow;
-    if (oneFinalRow) {
-      classification = "Lot Bid";
-      reason = `Ranking colors appear only on the aggregate bidder totals in row ${groupedRows[0]}, not on the item rows.`;
+  } else if (rankCells.length > 0) {
+    classification = "Line Bid";
+    if (itemRanks.length > 0 && subtotalRanks.length === 0) {
+      reason = `Ranking colors are applied to calculated bidder totals on ${new Set(itemRanks.map((cell) => cell.row)).size} individual item row(s).`;
+    } else if (itemRanks.length === 0 && subtotalRows.length > 0) {
+      reason = `Ranking colors appear on supporting section subtotal rows ${subtotalRows.join(", ")} within the numbered line-item schedule; there is no single ranked total for the whole PR.`;
     } else {
-      classification = "Grouped/Section Bid";
-      reason = `Ranking colors appear on grouped subtotal rows ${groupedRows.join(", ")} instead of individual item rows.`;
+      reason = "Ranking evidence appears on line items and supporting subtotals rather than only on one final aggregate total.";
     }
     confidence = legend.found >= 3 ? "High" : "Medium";
-  } else if (itemRanks.length > 0 && groupedRanks.length > 0) {
-    classification = "Needs Review";
-    reason = "Ranking colors appear on both individual item rows and subtotal/total rows.";
-    confidence = "Medium";
   }
 
   const rankedCells = rankCells

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Identify line, lot, and grouped bids from BAC abstract-of-bids Excel workbooks.">
+  <meta name="description" content="Identify line and lot bids from BAC abstract-of-bids Excel workbooks.">
   <title>BAC Bid Basis Checker</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23102a43'/%3E%3Ctext x='32' y='39' text-anchor='middle' font-family='Arial' font-size='20' font-weight='700' fill='white'%3EBAC%3C/text%3E%3C/svg%3E">
   <style>
@@ -127,7 +127,7 @@ main { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
 .method-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
 .method-dot.line { background: var(--green); }
 .method-dot.lot { background: var(--blue); }
-.method-dot.grouped { background: var(--orange); }
+.method-dot.review { background: var(--red); }
 
 .upload-card {
   overflow: hidden;
@@ -172,13 +172,12 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 .results-heading h2 { margin: 0; color: var(--navy); font-size: 1.8rem; }
 .actions { display: flex; gap: 8px; }
 
-.summary-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px; }
+.summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px; }
 .summary-card { min-height: 100px; padding: 16px; border: 1px solid var(--line); border-top: 4px solid #8095a8; border-radius: 12px; background: white; }
 .summary-card span { display: block; min-height: 40px; color: var(--muted); font-size: .84rem; }
 .summary-card strong { color: var(--navy); font-size: 1.7rem; }
 .summary-card.line-bid { border-top-color: var(--green); }
 .summary-card.lot-bid { border-top-color: var(--blue); }
-.summary-card.grouped-section-bid { border-top-color: var(--orange); }
 .summary-card.needs-review { border-top-color: var(--red); }
 
 .filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
@@ -198,7 +197,6 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 .badge { display: inline-block; padding: 5px 9px; border-radius: 999px; font-size: .78rem; font-weight: 800; white-space: nowrap; }
 .badge.line-bid { background: var(--green-soft); color: var(--green); }
 .badge.lot-bid { background: var(--blue-soft); color: var(--blue); }
-.badge.grouped-section-bid { background: var(--orange-soft); color: var(--orange); }
 .badge.needs-review { background: var(--red-soft); color: var(--red); }
 .details-button { padding: 6px 9px; border: 1px solid var(--line); background: white; color: var(--blue); white-space: nowrap; }
 .details-row td { padding: 0; background: #f8fafc; }
@@ -252,15 +250,15 @@ footer { padding: 24px 20px; border-top: 1px solid var(--line); color: var(--mut
     <section class="intro" aria-labelledby="intro-title">
       <div>
         <p class="eyebrow">Excel workbook analyzer</p>
-        <h2 id="intro-title">Identify line, lot, and grouped bids from workbook evidence.</h2>
+        <h2 id="intro-title">Identify line and lot bids from workbook evidence.</h2>
         <p class="intro-copy">The checker reads item rows, bidder totals, formulas, ranking colors, and the workbook legend. It reports the cells supporting each result.</p>
       </div>
       <aside class="method-card" aria-label="Classification method">
         <h3>How results are classified</h3>
         <dl>
-          <div><dt><span class="method-dot line"></span>Line Bid</dt><dd>Ranks appear on item rows</dd></div>
+          <div><dt><span class="method-dot line"></span>Line Bid</dt><dd>Ranks item lines or supporting subtotals</dd></div>
           <div><dt><span class="method-dot lot"></span>Lot Bid</dt><dd>Ranks appear on the final total</dd></div>
-          <div><dt><span class="method-dot grouped"></span>Grouped</dt><dd>Ranks appear on section subtotals</dd></div>
+          <div><dt><span class="method-dot review"></span>Needs Review</dt><dd>Evidence is absent or conflicting</dd></div>
         </dl>
       </aside>
     </section>
@@ -294,7 +292,6 @@ footer { padding: 24px 20px; border-top: 1px solid var(--line); color: var(--mut
         <button class="active" data-filter="All" type="button">All</button>
         <button data-filter="Line Bid" type="button">Line Bid</button>
         <button data-filter="Lot Bid" type="button">Lot Bid</button>
-        <button data-filter="Grouped/Section Bid" type="button">Grouped</button>
         <button data-filter="Needs Review" type="button">Needs Review</button>
       </div>
 

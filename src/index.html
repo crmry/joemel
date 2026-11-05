@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Identify line, lot, and grouped bids from BAC abstract-of-bids Excel workbooks.">
+  <meta name="description" content="Identify line and lot bids from BAC abstract-of-bids Excel workbooks.">
   <title>BAC Bid Basis Checker</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23102a43'/%3E%3Ctext x='32' y='39' text-anchor='middle' font-family='Arial' font-size='20' font-weight='700' fill='white'%3EBAC%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="./styles.css">
@@ -24,15 +24,15 @@
     <section class="intro" aria-labelledby="intro-title">
       <div>
         <p class="eyebrow">Excel workbook analyzer</p>
-        <h2 id="intro-title">Identify line, lot, and grouped bids from workbook evidence.</h2>
+        <h2 id="intro-title">Identify line and lot bids from workbook evidence.</h2>
         <p class="intro-copy">The checker reads item rows, bidder totals, formulas, ranking colors, and the workbook legend. It reports the cells supporting each result.</p>
       </div>
       <aside class="method-card" aria-label="Classification method">
         <h3>How results are classified</h3>
         <dl>
-          <div><dt><span class="method-dot line"></span>Line Bid</dt><dd>Ranks appear on item rows</dd></div>
+          <div><dt><span class="method-dot line"></span>Line Bid</dt><dd>Ranks item lines or supporting subtotals</dd></div>
           <div><dt><span class="method-dot lot"></span>Lot Bid</dt><dd>Ranks appear on the final total</dd></div>
-          <div><dt><span class="method-dot grouped"></span>Grouped</dt><dd>Ranks appear on section subtotals</dd></div>
+          <div><dt><span class="method-dot review"></span>Needs Review</dt><dd>Evidence is absent or conflicting</dd></div>
         </dl>
       </aside>
     </section>
@@ -66,7 +66,6 @@
         <button class="active" data-filter="All" type="button">All</button>
         <button data-filter="Line Bid" type="button">Line Bid</button>
         <button data-filter="Lot Bid" type="button">Lot Bid</button>
-        <button data-filter="Grouped/Section Bid" type="button">Grouped</button>
         <button data-filter="Needs Review" type="button">Needs Review</button>
       </div>
 
