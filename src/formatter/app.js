@@ -97,7 +97,7 @@ async function library() {
 function reportDetail(r) {
   if (r.mode === 'ERROR') return r.basis || 'Could not process this workbook';
   const className = r.mode === 'line' ? 'Line Bid' : r.mode === 'lot' ? 'Lot Bid' : 'Needs classification review';
-  const color = r.colorMode === 'static' ? 'Mac-compatible colors' : 'Live Excel colors';
+  const color = r.colorMode === 'static' ? 'Standard Excel colors' : 'Dynamic Excel colors';
   return `${className} · ${color} · ${r.items ?? 0} items · ${r.basis || ''}`;
 }
 function addResult(entry, index) {
