@@ -42,7 +42,8 @@ function formatNames(files) {
   // so multiple copies never overwrite one another in Download All.
   const used = new Set();
   return files.map(file => {
-    const base = safeFileName(file.name).replace(/\.xlsx$/i, '');
+    const base = safeFileName(file.name).replace(/\.xlsx$/i, '')
+      .replace(/(?:_formatted|_autoformatted)(?:\s*\(\d+\))?$/i, '');
     let candidate = base + '.xlsx';
     let count = 2;
     while (used.has(candidate.toLowerCase())) {
@@ -236,7 +237,7 @@ async function processFiles() {
   try {
     ui.status.textContent = 'Loading Excel formatter…';
     const [, { transformWorkbook }] = await Promise.all([
-      library(), import('./engine.js?v=1.2.0')
+      library(), import('./engine.js?v=1.2.1')
     ]);
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
