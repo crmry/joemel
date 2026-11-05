@@ -3,6 +3,8 @@ import { classifyWorkbook } from "./classifier-core.js?v=1.0.2";
 const state = {
   results: [],
   filter: "All",
+  prFilter: "All",
+  sortOrder: "ascending",
 };
 
 const elements = {
@@ -14,6 +16,8 @@ const elements = {
   resultsBody: document.querySelector("#results-body"),
   summary: document.querySelector("#summary"),
   filters: document.querySelector("#filters"),
+  prFilter: document.querySelector("#pr-filter"),
+  sortOrder: document.querySelector("#sort-order"),
   exportButton: document.querySelector("#export-button"),
   clearButton: document.querySelector("#clear-button"),
 };
@@ -37,6 +41,41 @@ function formatCurrency(value) {
     currency: "PHP",
     maximumFractionDigits: 2,
   }).format(value);
+}
+
+
+function sequenceNumber(result) {
+  const match = /^\s*(\d+)\s*\)/.exec(String(result.fileName ?? result.name ?? ""));
+  return match ? Number(match[1]) : null;
+}
+
+function compareResults(a, b, sortOrder = "ascending") {
+  const aName = String(a.fileName ?? a.name ?? "");
+  const bName = String(b.fileName ?? b.name ?? "");
+  const byFileName = aName.localeCompare(bName, undefined, { numeric: true, sensitivity: "base" });
+  if (sortOrder === "filename") return byFileName;
+  const aNumber = sequenceNumber(a);
+  const bNumber = sequenceNumber(b);
+  if (aNumber === null) return bNumber === null ? byFileName : 1;
+  if (bNumber === null) return -1;
+  if (aNumber !== bNumber) return sortOrder === "descending" ? bNumber - aNumber : aNumber - bNumber;
+  return byFileName;
+}
+
+function visibleResults() {
+  return state.results
+    .filter((item) => state.filter === "All" || item.classification === state.filter)
+    .filter((item) => state.prFilter === "All" || String(sequenceNumber(item)) === state.prFilter)
+    .sort((a, b) => compareResults(a, b, state.sortOrder));
+}
+
+function updatePrOptions() {
+  const numbers = [...new Set(state.results.map(sequenceNumber).filter((number) => number !== null))]
+    .sort((a, b) => a - b);
+  elements.prFilter.innerHTML = '<option value="All">All PRs</option>' +
+    numbers.map((n) => '<option value="' + n + '">PR ' + n + '</option>').join("");
+  if (state.prFilter !== "All" && !numbers.includes(Number(state.prFilter))) state.prFilter = "All";
+  elements.prFilter.value = state.prFilter;
 }
 
 function renderSummary() {
@@ -87,9 +126,7 @@ function renderEvidence(result) {
 }
 
 function renderResults() {
-  const visible = state.filter === "All"
-    ? state.results
-    : state.results.filter((result) => result.classification === state.filter);
+  const visible = visibleResults();
 
   renderSummary();
   elements.resultsSection.hidden = state.results.length === 0;
@@ -125,7 +162,7 @@ function renderResults() {
 }
 
 async function analyzeFiles(fileList) {
-  const files = [...fileList].filter((file) => /\.xlsx$/i.test(file.name));
+  const files = [...fileList].filter((file) => /\.xlsx$/i.test(file.name)).sort(compareResults);
   if (files.length === 0) {
     elements.status.textContent = "Choose one or more .xlsx workbooks.";
     elements.status.className = "status error";
@@ -134,6 +171,8 @@ async function analyzeFiles(fileList) {
 
   elements.status.className = "status working";
   state.results = [];
+  state.prFilter = "All";
+  updatePrOptions();
   renderResults();
 
   for (let index = 0; index < files.length; index += 1) {
@@ -155,6 +194,7 @@ async function analyzeFiles(fileList) {
     renderResults();
   }
 
+  updatePrOptions();
   const successful = state.results.filter((result) => !result.error).length;
   elements.status.textContent = `Finished: ${successful} of ${files.length} workbook(s) classified.`;
   elements.status.className = successful === files.length ? "status success" : "status warning";
@@ -167,7 +207,7 @@ function csvValue(value) {
 
 function exportCsv() {
   const header = ["File", "PR number", "Classification", "Confidence", "Items", "Bidders", "Evidence cells", "Reason", "Participation note"];
-  const rows = state.results.map((result) => [
+  const rows = visibleResults().map((result) => [
     result.fileName,
     result.prNumber,
     result.classification,
@@ -193,6 +233,8 @@ elements.fileInput.addEventListener("change", (event) => analyzeFiles(event.targ
 elements.exportButton.addEventListener("click", exportCsv);
 elements.clearButton.addEventListener("click", () => {
   state.results = [];
+  state.prFilter = "All";
+  updatePrOptions();
   elements.fileInput.value = "";
   elements.status.textContent = "No workbook selected.";
   elements.status.className = "status";
@@ -221,4 +263,15 @@ elements.filters.addEventListener("click", (event) => {
   renderResults();
 });
 
+elements.prFilter.addEventListener("change", (event) => {
+  state.prFilter = event.target.value;
+  renderResults();
+});
+
+elements.sortOrder.addEventListener("change", (event) => {
+  state.sortOrder = event.target.value;
+  renderResults();
+});
+
+updatePrOptions();
 renderResults();
