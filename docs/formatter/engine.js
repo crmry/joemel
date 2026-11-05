@@ -252,32 +252,60 @@ function writeRules(sheet,styles,cols,items,totals,mode,targets){
   }
   return count;
 }
-function configurePrint(sheet,wb,sheetname,lastCol,lastRow,paper){
+function configurePrint(sheet,wb,sheetname,lastCol,lastRow,paper,pageOptions={}){
   const root=sheet.documentElement;
   let prop=child(root,'sheetPr');if(!prop){prop=node(sheet,'sheetPr');root.insertBefore(prop,root.firstChild);}
   let setupProp=child(prop,'pageSetUpPr');if(!setupProp){setupProp=node(sheet,'pageSetUpPr');prop.appendChild(setupProp);}
-  setupProp.setAttribute('fitToPage','1');setupProp.setAttribute('autoPageBreaks','1');
+  const scaling=pageOptions.scaling==='adjust'?'adjust':'fit';
+  const percent=Math.min(400,Math.max(10,Number(pageOptions.scalePercent)||70));
+  setupProp.setAttribute('fitToPage',scaling==='fit'?'1':'0');setupProp.setAttribute('autoPageBreaks','1');
   let margins=child(root,'pageMargins');
   if(!margins){margins=node(sheet,'pageMargins',{left:'0.25',right:'0.25',top:'0.25',bottom:'0.75',header:'0',footer:'0'});insertOrdered(root,['pageSetup','headerFooter','rowBreaks','colBreaks','drawing','extLst'],margins);}
   let page=child(root,'pageSetup');if(!page){page=node(sheet,'pageSetup');insertOrdered(root,['headerFooter','rowBreaks','colBreaks','drawing','extLst'],page);}
   if(paper!=='preserve')page.setAttribute('paperSize',PAPERS[paper]);
   else if(!page.getAttribute('paperSize'))page.setAttribute('paperSize','14');
-  page.setAttribute('orientation','landscape');page.setAttribute('fitToWidth','1');page.setAttribute('fitToHeight','0');page.setAttribute('pageOrder','overThenDown');page.removeAttribute('scale');
-  // Old BAC templates embed printerSettings1.bin and reference it from pageSetup.
-  // That cached legacy 70% scale may override the new fit-to-width settings in Excel for Mac.
+  page.setAttribute('orientation',pageOptions.orientation==='portrait'?'portrait':'landscape');
+  page.setAttribute('pageOrder','overThenDown');
+  if(scaling==='fit'){
+    page.setAttribute('fitToWidth','1');
+    page.setAttribute('fitToHeight','0');
+    page.removeAttribute('scale');
+  }else{
+    page.setAttribute('scale',String(percent));
+    page.removeAttribute('fitToWidth');
+    page.removeAttribute('fitToHeight');
+  }
+  // Old BAC templates embed a printerSettings1.bin relationship holding their
+  // legacy print configuration. Stop it overriding the chosen options on Mac.
   page.removeAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','id');
   page.removeAttribute('r:id');
-  // The PR templates already have "Page &P of &N", but no explicit footer alignment.
-  // Make the original page-number footer a proper centered footer for Excel for Mac.
-  const hf=child(root,'headerFooter');
-  const footer=child(hf,'oddFooter');
-  if(footer&&/^Page\s*&P\s+of\s+&N$/i.test((footer.textContent||'').trim())){
-    footer.textContent='&CPage &P of &N';
+  const headerSelection=pageOptions.header||'original';
+  const footerSelection=pageOptions.footer||'original';
+  let hf=child(root,'headerFooter');
+  if(!hf&&footerSelection==='page'){
+    hf=node(sheet,'headerFooter');
+    insertOrdered(root,['rowBreaks','colBreaks','drawing','extLst'],hf);
+  }
+  if(hf){
+    if(headerSelection==='none'){
+      const existingHeader=child(hf,'oddHeader');
+      if(existingHeader)existingHeader.textContent='';
+    }
+    let footer=child(hf,'oddFooter');
+    if(footerSelection==='page'&&!footer){
+      footer=node(sheet,'oddFooter');
+      hf.appendChild(footer);
+    }
+    if(footerSelection==='none'&&footer)footer.textContent='';
+    else if(footerSelection==='page')footer.textContent='&CPage &P of &N';
+    else if(footer&&/^Page\s*&P\s+of\s+&N$/i.test((footer.textContent||'').trim())){
+      // Original page-number footer lacked its alignment marker.
+      footer.textContent='&CPage &P of &N';
+    }
     hf.setAttribute('alignWithMargins','1');
     hf.setAttribute('scaleWithDoc','1');
-    // The original templates position their footer at 0 inches, which can
-    // clip the page number when printed. Keep it inside the existing 0.75-inch bottom margin.
-    if(margins&&Number(margins.getAttribute('footer')||0)<0.25)margins.setAttribute('footer','0.3');
+    if(footer&&(footer.textContent||'').trim()&&margins&&
+       Number(margins.getAttribute('footer')||0)<0.25)margins.setAttribute('footer','0.3');
   }
   const breaks=child(root,'colBreaks');if(breaks)root.removeChild(breaks);
   const escaped="'"+sheetname.replace(/'/g,"''")+"'";
@@ -341,7 +369,7 @@ function serializePatchedSheet(original,doc,updates){
   return xml;
 }
 
-export async function transformWorkbook(name,buffer,mode,paper,colorMode="live"){
+export async function transformWorkbook(name,buffer,mode,paper,colorMode="live",pageOptions={}){
   const zip=await window.JSZip.loadAsync(buffer);
   for(const path of ['xl/workbook.xml','xl/styles.xml','xl/worksheets/sheet1.xml'])if(!zip.file(path))throw Error('Unsupported BAC template: '+path+' missing');
   const [workbookText,stylesText,sheetText,sharedText]=await Promise.all([
@@ -369,7 +397,7 @@ export async function transformWorkbook(name,buffer,mode,paper,colorMode="live")
   }
   const lastCol=columnName(Math.max(colNumber(cols[cols.length-1]),5));
   const sheetname=child(wb.documentElement,'sheets')?child(child(wb.documentElement,'sheets'),'sheet')?.getAttribute('name')||'Sheet1':'Sheet1';
-  const area=configurePrint(sheet,wb,sheetname,lastCol,lastRow,paper);
+  const area=configurePrint(sheet,wb,sheetname,lastCol,lastRow,paper,pageOptions);
   let rules=0,cleared=0,staticColors=0,uncached=0,styleUpdates=new Map();
   if(meta.mode){
     const fallback=applyStaticFallback(cells,styles,xfs,fills,cols,items,targets,meta.mode,shared);
