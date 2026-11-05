@@ -60,3 +60,12 @@ The same GitHub Pages website also provides the [BAC Color & Page Setup Fixer](h
 All processing happens in the browser. Excel files are never sent to GitHub Pages or stored on a server. The Excel ZIP library and editing engine load only when conversion is requested.
 
 The browser formatter is maintained in `src/formatter/`, with the corresponding deployable copy in `docs/formatter/`. The existing build script copies `src` to `docs`. The engine is designed for these BAC comparison templates, not arbitrary spreadsheet layouts. Automatic classification of PR 10 and above is inferred from workbook evidence and should be checked against official bid documents.
+
+## Excel for Mac display compatibility
+
+Version 1.0.4 provides two coloring options on the formatter page:
+
+- **Live colors (update in Excel):** writes dynamic conditional rules with differential background fills (`bgColor`, not normal `fgColor` solid fills) to address black cells in Excel for Mac.
+- **Mac compatibility (static colors):** calculates each ranking during conversion, removes the formatter's live conditional rules, and writes ordinary colored cell styles. The colors are visible in Excel without conditional-format rendering, but do not auto-update when users edit bid amounts; re-run the formatter after changes.
+
+Both modes preserve the original workbook data, formulas, row/column layout, and merged ranges. For an existing broken download, reprocess the original .xlsx file and choose Mac compatibility mode. This is a local-only browser process; no workbook is stored on GitHub Pages.
