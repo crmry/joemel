@@ -6,7 +6,7 @@
   <meta name="color-scheme" content="light">
   <title>BAC | PR Auto-Formatter</title>
   <link rel="stylesheet" href="./styles.css">
-  <script src="./app.js?v=1.2.1" defer></script>
+  <script src="./app.js?v=1.2.2" defer></script>
 </head>
 <body>
   <main class="wrap">
@@ -31,7 +31,7 @@
           <select id="paper"><option value="preserve">Keep original</option><option value="folio" selected>Folio</option><option value="legal">Legal</option><option value="a4">A4</option><option value="letter">Letter</option></select>
         </label>
         <label>Color update mode
-          <select id="color-mode"><option value="static" selected>Mac compatibility (static colors) — recommended</option><option value="live">Live colors (update in Excel)</option></select>
+          <select id="color-mode"><option value="static" selected>Standard colors — Windows & Mac (recommended)</option><option value="live">Dynamic colors — update automatically in Excel</option></select>
         </label>
       </div>
       <fieldset class="page-settings">
@@ -100,7 +100,7 @@
     <section class="details">
       <h2>Automatic legend</h2>
       <div class="legend"><span><i class="green"></i>1st</span><span><i class="yellow"></i>2nd</span><span><i class="orange"></i>3rd</span><span><i class="pink"></i>Above ABC</span></div>
-      <p><strong>Line Bid</strong> ranks each item separately; <strong>Lot Bid</strong> ranks the total lot amount. Equal amounts share the same rank. In Live mode, colors update in Excel after changing bids. Mac compatibility mode fixes the colors during conversion but does not update them again in Excel.</p>
+      <p><strong>Line Bid</strong> ranks each item separately; <strong>Lot Bid</strong> ranks the total lot amount. Equal amounts share the same rank. Standard colors use normal Excel cell fills on Windows and Mac. They remain fixed until you reprocess the workbook after editing prices. Dynamic colors use Excel conditional formatting to update when prices change.</p>
       <p class="privacy">Processing runs only in your browser. No upload, accounts, server processing, or persistent workbook storage. For an uncertain bid classification, select Line Bid or Lot Bid explicitly. Review the formatted Excel before using it for procurement decisions.</p>
     </section>
     <footer>BAC Color &amp; Page Setup Fixer · Private, in-browser processing</footer>
