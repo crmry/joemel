@@ -1,4 +1,4 @@
-import { classifyWorkbook } from "./classifier-core.js";
+import { classifyWorkbook } from "./classifier-core.js?v=1.0.2";
 
 const state = {
   results: [],
