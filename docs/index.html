@@ -183,6 +183,10 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 .filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
 .filters button { padding: 7px 12px; border: 1px solid var(--line); background: white; color: var(--muted); font-size: .86rem; }
 .filters button.active { border-color: var(--navy); background: var(--navy); color: white; }
+.bac-extra-filter { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); font-weight: 650; font-size: .85rem; }
+.bac-extra-filter:first-of-type { margin-left: auto; }
+.bac-extra-filter select { padding: 7px 10px; border: 1px solid var(--line); border-radius: 9px; color: var(--navy); background: white; font: inherit; cursor: pointer; }
+.bac-extra-filter select:focus-visible { outline: 3px solid rgba(23,107,135,.3); outline-offset: 2px; }
 
 .table-card { border: 1px solid var(--line); border-radius: 14px; background: white; box-shadow: 0 10px 30px rgba(16,42,67,.06); }
 .table-scroll { overflow-x: auto; }
@@ -294,6 +298,12 @@ footer { padding: 24px 20px; border-top: 1px solid var(--line); color: var(--mut
         <button data-filter="Line Bid" type="button">Line Bid</button>
         <button data-filter="Lot Bid" type="button">Lot Bid</button>
         <button data-filter="Needs Review" type="button">Needs Review</button>
+        <label for="pr-filter" class="bac-extra-filter">PR <select id="pr-filter" aria-label="Filter by PR number"><option value="All">All PRs</option></select></label>
+        <label for="sort-order" class="bac-extra-filter">Sort <select id="sort-order" aria-label="Sort results">
+          <option value="ascending">PR 1–25</option>
+          <option value="descending">PR 25–1</option>
+          <option value="filename">File name A–Z</option>
+        </select></label>
       </div>
 
       <div class="table-card table-scroll">
@@ -320,6 +330,6 @@ footer { padding: 24px 20px; border-top: 1px solid var(--line); color: var(--mut
   </footer>
 
   <script src="./vendor/jszip.min.js"></script>
-  <script type="module" src="./app.js?v=1.0.2"></script>
+  <script type="module" src="./app.js?v=1.0.3"></script>
 </body>
 </html>
