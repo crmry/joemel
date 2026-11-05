@@ -43,3 +43,13 @@
   .preview-meta { padding:10px 15px; }
   .preview-footer { padding:12px 15px; gap:12px; }
 }
+
+
+/* Page Setup options mirror the Page and Header/Footer dialogs in Excel. */
+.page-settings { border:1px solid #dce6ef; border-radius:13px; margin:20px 0 0; padding:17px 18px 15px; background:#fafdff; }
+.page-settings legend { padding:0 8px; color:#224e76; font-weight:750; font-size:14px; }
+.page-settings .options { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.page-settings input { width:100%; border:1px solid #ccd6e4; border-radius:8px; background:#fff; color:#28374e; padding:11px; font:inherit; }
+.page-settings [hidden] { display:none!important; }
+.page-hint { margin:14px 2px 0; color:#64748b; font-size:12px; line-height:1.55; }
+@media(max-width:560px){ .page-settings .options { grid-template-columns:1fr; } .page-settings { padding:13px; } }
