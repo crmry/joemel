@@ -242,7 +242,26 @@ function applyStaticFallback(cells,styles,xfs,fills,cols,items,targets,mode,shar
       if(!color&&hasOldColor)cleared++;
     }
   }
-  return {changed,cleared,uncached,updates};
+  // Never report a workbook as successfully formatted unless its ranking
+  // cells contain real, verifiable solid fills (not only conditional rules).
+  const actualFills=children(child(styles.documentElement,'fills'),'fill');
+  let expected=0,verified=0;
+  for(const row of targets){
+    const budget=Number(readString(cells.get('E'+row),shared));
+    if(!Number.isFinite(budget)||budget<=0)continue;
+    const offers=cols.map(col=>({col,amount:Number(readString(cells.get(col+row),shared))}))
+      .filter(x=>cells.has(x.col+row)&&Number.isFinite(x.amount)&&x.amount>0);
+    const ranked=[...new Set(offers.filter(x=>x.amount<=budget).map(x=>x.amount))].sort((a,b)=>a-b);
+    for(const offer of offers){
+      const expectedColor=offer.amount>budget?'FFFF66FF':['FF00B050','FFFFFF00','FFFF6600'][ranked.indexOf(offer.amount)];
+      if(!expectedColor)continue;
+      expected++;
+      if(readColors(cells.get(offer.col+row),xfs,actualFills)===expectedColor)verified++;
+    }
+  }
+  if(expected===0)throw Error('No verifiable ranked bid amounts were found. Check this template and its cached formulas.');
+  if(verified!==expected)throw Error(`Bid colors were not written correctly (${verified}/${expected}). No download was generated.`);
+  return {changed,cleared,uncached,updates,verified};
 }
 function rankFormula(row,cols,current){
   return 'SUM('+cols.map((col,index)=>{
@@ -402,7 +421,13 @@ function serializePatchedSheet(original,doc,updates){
   if(!child(root,'colBreaks'))xml=xml.replace(/<colBreaks\b[^>]*>[\s\S]*?<\/colBreaks>/g,'')
     .replace(/<colBreaks\b[^>]*\/>/g,'');
   // Keep all original <cols>, <row>, <mergeCell>, drawings and cached values byte-for-byte.
-  parse(xml,'preserved sheet');
+  const finalSheet=parse(xml,'preserved sheet');
+  if(updates?.size){
+    const finalCells=new Map(findByName(finalSheet,'sheetData')
+      .flatMap(data=>findByName(data,'c')).map(c=>[c.getAttribute('r'),c]));
+    for(const [ref,id] of updates)if(finalCells.get(ref)?.getAttribute('s')!==String(id))
+      throw Error('Failed to preserve ranking color on cell '+ref);
+  }
   return xml;
 }
 
@@ -436,10 +461,10 @@ export async function transformWorkbook(name,buffer,mode,paper,colorMode="live",
   const lastCol=columnName(Math.max(colNumber(cols[cols.length-1]),5));
   const sheetname=child(wb.documentElement,'sheets')?child(child(wb.documentElement,'sheets'),'sheet')?.getAttribute('name')||'Sheet1':'Sheet1';
   const area=configurePrint(sheet,wb,sheetname,lastCol,lastRow,paper,pageOptions);
-  let rules=0,cleared=0,staticColors=0,uncached=0,styleUpdates=new Map();
+  let rules=0,cleared=0,staticColors=0,verifiedColors=0,uncached=0,styleUpdates=new Map();
   if(meta.mode){
     const fallback=applyStaticFallback(cells,styles,xfs,fills,cols,items,targets,meta.mode,shared);
-    ({cleared,uncached}=fallback);staticColors=fallback.changed;styleUpdates=fallback.updates;
+    ({cleared,uncached}=fallback);staticColors=fallback.changed;verifiedColors=fallback.verified;styleUpdates=fallback.updates;
     if(colorMode==="static")clearGeneratedRules(sheet);
     else rules=writeRules(sheet,styles,cols,items,totals,meta.mode,targets);
   }
@@ -458,5 +483,5 @@ export async function transformWorkbook(name,buffer,mode,paper,colorMode="live",
     if(stale.length)zip.file(relsPath,serialize(relDoc),{createFolders:false});
   }
   const data=await zip.generateAsync({type:'uint8array',compression:'DEFLATE',compressionOptions:{level:3}});
-  return {data,report:{file:name,mode:meta.mode||'REVIEW REQUIRED',basis:meta.basis,colorMode,items:items.length,suppliers:cols.length,rules,cleared,staticColors,uncached,printArea:area}};
+  return {data,report:{file:name,mode:meta.mode||'REVIEW REQUIRED',basis:meta.basis,colorMode,items:items.length,suppliers:cols.length,rules,cleared,staticColors,verifiedColors,uncached,printArea:area}};
 }
