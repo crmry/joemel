@@ -6,7 +6,7 @@
   <meta name="color-scheme" content="light">
   <title>BAC | PR Auto-Formatter</title>
   <link rel="stylesheet" href="./styles.css">
-  <script src="./app.js?v=1.0.4" defer></script>
+  <script src="./app.js?v=1.1.0" defer></script>
 </head>
 <body>
   <main class="wrap">
@@ -14,12 +14,12 @@
     <header>
       <div class="overline">BIDS AND AWARDS COMMITTEE</div>
       <h1>Color &amp; Page Setup Fixer</h1>
-      <p>Standardize print layout and apply automatic bid ranking colors. Files stay on your device.</p>
+      <p>Upload once, preview your formatted workbooks, and download individually or all together. Files stay on your device.</p>
     </header>
     <section class="panel" aria-label="Workbook formatter">
       <div id="drop" class="drop" role="button" tabindex="0" aria-label="Choose Excel files or drop them here">
         <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 16V4m0 0L7 9m5-5l5 5M4 17v3h16v-3"/></svg>
-        <strong>Drop Excel files here</strong><span>or click to choose .xlsx files</span>
+        <strong>Drop Excel files here</strong><span>or click to choose .xlsx files — formatting starts automatically</span>
         <input id="files" type="file" accept=".xlsx" multiple aria-label="Select purchase requisition workbooks">
       </div>
       <div id="names" class="files">No Excel files selected</div>
@@ -34,11 +34,35 @@
           <select id="color-mode"><option value="live">Live colors (update in Excel)</option><option value="static">Mac compatibility (static colors)</option></select>
         </label>
       </div>
-      <button id="process" disabled>Format &amp; Download</button>
+      <button id="process" disabled>Reprocess selected workbooks</button>
       <progress id="meter" value="0" max="100" hidden></progress>
       <div id="status" class="status" role="status" aria-live="polite"></div>
+      <div id="downloads-toolbar" class="downloads-toolbar" hidden>
+        <div class="download-summary">
+          <strong>Formatted workbooks</strong>
+          <span id="download-count"></span>
+        </div>
+        <button id="download-all" class="download-all" type="button" disabled>Download All (.zip)</button>
+      </div>
       <div id="results" class="results" aria-live="polite"></div>
     </section>
+    <dialog id="preview-dialog" class="preview-dialog" aria-labelledby="preview-title" aria-describedby="preview-meta">
+      <div class="preview-modal">
+        <header class="preview-header">
+          <div>
+            <p class="preview-eyebrow">READ-ONLY EXCEL PREVIEW</p>
+            <h2 id="preview-title">Workbook preview</h2>
+          </div>
+          <button id="preview-close" class="preview-close" type="button" aria-label="Close preview">Close</button>
+        </header>
+        <p id="preview-meta" class="preview-meta" role="status"></p>
+        <div id="preview-sheet" class="preview-sheet" aria-label="Formatted Excel worksheet"></div>
+        <footer class="preview-footer">
+          <span>Cell values and fill colors are shown for review. This is not an exact Excel print preview; check Page Layout in Excel before final printing.</span>
+          <button id="preview-download" type="button">Download Excel</button>
+        </footer>
+      </div>
+    </dialog>
     <section class="details">
       <h2>Automatic legend</h2>
       <div class="legend"><span><i class="green"></i>1st</span><span><i class="yellow"></i>2nd</span><span><i class="orange"></i>3rd</span><span><i class="pink"></i>Above ABC</span></div>
