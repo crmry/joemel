@@ -221,12 +221,16 @@ function candidateFormula(row,cols,col,label,requiresItem){
   else f=`AND(${f},${price}<=${budget},${rankFormula(row,cols,price)}=${{'1st':0,'2nd':1,'3rd':2}[label]})`;
   return requiresItem?`AND(ISNUMBER($A${row}),${f})`:f;
 }
-function writeRules(sheet,styles,cols,items,totals,mode,targets){
+function clearGeneratedRules(sheet){
   const root=sheet.documentElement;
   for(const el of children(root,'conditionalFormatting')){
     const text=children(el,'cfRule').flatMap(r=>children(r,'formula').map(n=>n.textContent||'')).join(' ');
     if(text.includes('ISNUMBER($E')&&(text.includes('SUM(IF(')||text.includes('ISNUMBER($')))root.removeChild(el);
   }
+}
+function writeRules(sheet,styles,cols,items,totals,mode,targets){
+  clearGeneratedRules(sheet);
+  const root=sheet.documentElement;
   const prev=Math.max(0,...children(root,'conditionalFormatting').flatMap(e=>children(e,'cfRule').map(r=>Number(r.getAttribute('priority')||0))));
   let priority=prev+1, count=0;
   const ids=ensureDxf(styles),segments=[];
@@ -320,7 +324,7 @@ function serializePatchedSheet(original,doc,updates){
   return xml;
 }
 
-export async function transformWorkbook(name,buffer,mode,paper){
+export async function transformWorkbook(name,buffer,mode,paper,colorMode="live"){
   const zip=await window.JSZip.loadAsync(buffer);
   for(const path of ['xl/workbook.xml','xl/styles.xml','xl/worksheets/sheet1.xml'])if(!zip.file(path))throw Error('Unsupported BAC template: '+path+' missing');
   const [workbookText,stylesText,sheetText,sharedText]=await Promise.all([
@@ -353,12 +357,13 @@ export async function transformWorkbook(name,buffer,mode,paper){
   if(meta.mode){
     const fallback=applyStaticFallback(cells,styles,xfs,fills,cols,items,targets,meta.mode,shared);
     ({cleared,uncached}=fallback);staticColors=fallback.changed;styleUpdates=fallback.updates;
-    rules=writeRules(sheet,styles,cols,items,totals,meta.mode,targets);
+    if(colorMode==="static")clearGeneratedRules(sheet);
+    else rules=writeRules(sheet,styles,cols,items,totals,meta.mode,targets);
   }
   let calc=child(wb.documentElement,'calcPr');if(!calc){calc=node(wb,'calcPr');wb.documentElement.appendChild(calc);}
   calc.setAttribute('calcMode','auto');calc.setAttribute('fullCalcOnLoad','0');calc.setAttribute('forceFullCalc','0');
   zip.file('xl/workbook.xml',serialize(wb),{createFolders:false});zip.file('xl/worksheets/sheet1.xml',serializePatchedSheet(sheetText,sheet,styleUpdates),{createFolders:false});
   if(meta.mode)zip.file('xl/styles.xml',serialize(styles),{createFolders:false});
   const data=await zip.generateAsync({type:'uint8array',compression:'DEFLATE',compressionOptions:{level:3}});
-  return {data,report:{file:name,mode:meta.mode||'REVIEW REQUIRED',basis:meta.basis,items:items.length,suppliers:cols.length,rules,cleared,staticColors,uncached,printArea:area}};
+  return {data,report:{file:name,mode:meta.mode||'REVIEW REQUIRED',basis:meta.basis,colorMode,items:items.length,suppliers:cols.length,rules,cleared,staticColors,uncached,printArea:area}};
 }
