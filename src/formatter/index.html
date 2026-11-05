@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>BAC | PR Auto-Formatter</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./app.js?v=1.0.0" defer></script>
+</head>
+<body>
+  <main class="wrap">
+    <nav class="nav"><a href="../" aria-label="Back to Bid Basis Checker">← Bid Basis Checker</a><span>Color &amp; Page Setup Fixer</span></nav>
+    <header>
+      <div class="overline">BIDS AND AWARDS COMMITTEE</div>
+      <h1>Color &amp; Page Setup Fixer</h1>
+      <p>Standardize print layout and apply automatic bid ranking colors. Files stay on your device.</p>
+    </header>
+    <section class="panel" aria-label="Workbook formatter">
+      <div id="drop" class="drop" role="button" tabindex="0" aria-label="Choose Excel files or drop them here">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 16V4m0 0L7 9m5-5l5 5M4 17v3h16v-3"/></svg>
+        <strong>Drop Excel files here</strong><span>or click to choose .xlsx files</span>
+        <input id="files" type="file" accept=".xlsx" multiple aria-label="Select purchase requisition workbooks">
+      </div>
+      <div id="names" class="files">No Excel files selected</div>
+      <div class="options">
+        <label>Bid classification
+          <select id="mode"><option value="auto">Auto detect</option><option value="line">Line Bid</option><option value="lot">Lot Bid</option></select>
+        </label>
+        <label>Paper size
+          <select id="paper"><option value="preserve">Keep original</option><option value="folio">Folio</option><option value="legal">Legal</option><option value="a4">A4</option><option value="letter">Letter</option></select>
+        </label>
+      </div>
+      <button id="process" disabled>Format &amp; Download</button>
+      <progress id="meter" value="0" max="100" hidden></progress>
+      <div id="status" class="status" role="status" aria-live="polite"></div>
+      <div id="results" class="results" aria-live="polite"></div>
+    </section>
+    <section class="details">
+      <h2>Automatic legend</h2>
+      <div class="legend"><span><i class="green"></i>1st</span><span><i class="yellow"></i>2nd</span><span><i class="orange"></i>3rd</span><span><i class="pink"></i>Above ABC</span></div>
+      <p><strong>Line Bid</strong> ranks each item separately; <strong>Lot Bid</strong> ranks the total lot amount. Equal amounts share the same rank. Colors remain live in Excel after download.</p>
+      <p class="privacy">Processing runs only in your browser. No upload, accounts, server processing, or persistent workbook storage. For an uncertain bid classification, select Line Bid or Lot Bid explicitly. Review the formatted Excel before using it for procurement decisions.</p>
+    </section>
+    <footer>BAC Color &amp; Page Setup Fixer · Private, in-browser processing</footer>
+  </main>
+</body>
+</html>
