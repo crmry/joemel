@@ -275,6 +275,9 @@ function configurePrint(sheet,wb,sheetname,lastCol,lastRow,paper){
     footer.textContent='&CPage &P of &N';
     hf.setAttribute('alignWithMargins','1');
     hf.setAttribute('scaleWithDoc','1');
+    // The original templates position their footer at 0 inches, which can
+    // clip the page number when printed. Keep it inside the existing 0.75-inch bottom margin.
+    if(margins&&Number(margins.getAttribute('footer')||0)<0.25)margins.setAttribute('footer','0.3');
   }
   const breaks=child(root,'colBreaks');if(breaks)root.removeChild(breaks);
   const escaped="'"+sheetname.replace(/'/g,"''")+"'";
