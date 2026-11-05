@@ -227,3 +227,9 @@ footer { padding: 24px 20px; border-top: 1px solid var(--line); color: var(--mut
   .actions button { flex: 1; }
   .drop-zone { padding: 38px 16px; }
 }
+
+
+.formatter-link { margin-left: auto; padding: 9px 13px; border-radius: 9px; background: #176b87; color: white; text-decoration: none; white-space: nowrap; font-size: .85rem; font-weight: 750; }
+.formatter-link:hover, .formatter-link:focus-visible { background: #2088a4; color: white; }
+.privacy-pill { margin-left: 0; }
+@media (max-width: 720px) { .formatter-link { font-size: .75rem; padding: 8px 10px; white-space: normal; text-align: center; } }
