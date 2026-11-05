@@ -111,7 +111,8 @@ function ensureDxf(styles){
   const root=styles.documentElement;
   const dxfparent=child(root,'dxfs')||insertOrdered(root,['tableStyles','colors','extLst'],node(styles,'dxfs',{count:'0'}));
   const dxfs=children(dxfparent,'dxf'), ids=[];
-  for(const [,rgb] of RANKS){
+  const allRanks=[...RANKS,['Neutral','FFFFFFFF']];
+  for(const [,rgb] of allRanks){
     let idx=dxfs.findIndex(dxf=>child(child(child(dxf,'fill'),'patternFill'),'fgColor')?.getAttribute('rgb')?.toUpperCase()===rgb);
     if(idx===-1){
       const dxf=node(styles,'dxf'),fill=node(styles,'fill'),pattern=node(styles,'patternFill',{patternType:'solid'});
@@ -123,19 +124,72 @@ function ensureDxf(styles){
   dxfparent.setAttribute('count',dxfs.length);
   return ids;
 }
-function clearOldPaint(cells,styles,xfs,fills,cols,targets){
-  const parent=child(styles.documentElement,'cellXfs'),cache=new Map();let cleared=0;
-  for(const row of targets){for(const col of cols){
-    const cell=cells.get(col+row);if(!COLORS.has(readColors(cell,xfs,fills)))continue;
-    const old=Number(cell.getAttribute('s')||0);
-    if(!cache.has(old)){
-      const cloned=xfs[old].cloneNode(true);
-      cloned.setAttribute('fillId','0');cloned.setAttribute('applyFill','0');
-      const id=xfs.length;parent.appendChild(cloned);xfs.push(cloned);cache.set(old,id);
+function ensureFill(styles, rgb) {
+  const parent=child(styles.documentElement,'fills');
+  if(!parent)throw new Error('Workbook styles are missing fills');
+  const fills=children(parent,'fill');
+  let id=fills.findIndex(fill=>{
+    const pattern=child(fill,'patternFill');
+    return pattern?.getAttribute('patternType')==='solid' &&
+      child(pattern,'fgColor')?.getAttribute('rgb')?.toUpperCase()===rgb;
+  });
+  if(id<0){
+    const fill=node(styles,'fill'),pattern=node(styles,'patternFill',{patternType:'solid'});
+    pattern.appendChild(node(styles,'fgColor',{rgb}));
+    pattern.appendChild(node(styles,'bgColor',{indexed:'64'}));
+    fill.appendChild(pattern);parent.appendChild(fill);
+    id=fills.length; parent.setAttribute('count',String(id+1));
+  }
+  return id;
+}
+function ensureStaticStyle(styles,xfs,oldStyle,fillId,cache){
+  const key=oldStyle+':'+fillId;
+  if(cache.has(key))return cache.get(key);
+  const parent=child(styles.documentElement,'cellXfs');
+  const original=xfs[oldStyle];if(!original)throw Error('Unknown cell style: '+oldStyle);
+  if(Number(original.getAttribute('fillId')||0)===fillId&&original.getAttribute('applyFill')==='1'){
+    cache.set(key,oldStyle);return oldStyle;
+  }
+  const clone=original.cloneNode(true);
+  clone.setAttribute('fillId',String(fillId));
+  clone.setAttribute('applyFill','1');
+  const index=xfs.length;parent.appendChild(clone);xfs.push(clone);
+  parent.setAttribute('count',String(xfs.length));
+  cache.set(key,index);return index;
+}
+function applyStaticFallback(cells,styles,xfs,fills,cols,items,targets,mode,shared){
+  // Excel for Mac can show previously painted bid cells as black when their
+  // fill is removed and no conditional-format result is ready on first open.
+  // Write the correct visible color as a fallback, then apply live CF rules
+  // (including a neutral catch-all) so edits update correctly in Excel.
+  const white=ensureFill(styles,'FFFFFFFF'), fillIDs=new Map();
+  for(const [,rgb] of RANKS)fillIDs.set(rgb,ensureFill(styles,rgb));
+  const cache=new Map(), updates=new Map();let changed=0,cleared=0,uncached=0;
+  for(const row of targets){
+    const budget=Number(readString(cells.get('E'+row),shared));
+    const numeric=cols.map(col=>({col,cell:cells.get(col+row),amount:Number(readString(cells.get(col+row),shared))}))
+      .filter(x=>x.cell&&Number.isFinite(x.amount)&&x.amount>0);
+    const ranks=[...new Set(numeric.filter(x=>!budget||x.amount<=budget).map(x=>x.amount))].sort((a,b)=>a-b);
+    for(const col of cols){
+      const cell=cells.get(col+row);if(!cell)continue;
+      const value=readString(cell,shared);
+      const amount=Number(value);
+      const originalStyle=Number(cell.getAttribute('s')||0);
+      const oldRgb=readColors(cell,xfs,fills);
+      const hasOldColor=COLORS.has(oldRgb);
+      if(child(cell,'f')&&!value.trim())uncached++;
+      let color=null;
+      if(Number.isFinite(budget)&&budget>0&&value.trim()&&Number.isFinite(amount)&&amount>0){
+        if(amount>budget)color='FFFF66FF';
+        else color=['FF00B050','FFFFFF00','FFFF6600'][ranks.indexOf(amount)]||null;
+      }
+      if(!color&&!hasOldColor)continue;
+      const id=ensureStaticStyle(styles,xfs,originalStyle,color?fillIDs.get(color):white,cache);
+      if(id!==originalStyle){cell.setAttribute('s',String(id));updates.set(cell.getAttribute('r'),id);changed++;}
+      if(!color&&hasOldColor)cleared++;
     }
-    cell.setAttribute('s',cache.get(old));cleared++;
-  }}
-  parent.setAttribute('count',xfs.length);return cleared;
+  }
+  return {changed,cleared,uncached,updates};
 }
 function rankFormula(row,cols,current){
   return 'SUM('+cols.map((col,index)=>{
@@ -168,9 +222,9 @@ function writeRules(sheet,styles,cols,items,totals,mode,targets){
     const {col,start,end,item}=segment;
     const sqref=start===end?`${col}${start}`:`${col}${start}:${col}${end}`;
     const cf=node(sheet,'conditionalFormatting',{sqref});
-    for(let i=0;i<RANKS.length;i++){
+    for(let i=0;i<RANKS.length+1;i++){
       const rule=node(sheet,'cfRule',{type:'expression',dxfId:ids[i],priority:priority++,stopIfTrue:'1'});
-      const formula=node(sheet,'formula');formula.textContent=candidateFormula(start,cols,col,RANKS[i][0],item);
+      const formula=node(sheet,'formula');formula.textContent=i===RANKS.length?'TRUE':candidateFormula(start,cols,col,RANKS[i][0],item);
       rule.appendChild(formula);cf.appendChild(rule);count++;
     }
     const following=['dataValidations','hyperlinks','printOptions','pageMargins','pageSetup','headerFooter','rowBreaks','colBreaks','drawing','legacyDrawing','legacyDrawingHF','picture','oleObjects','controls','webPublishItems','tableParts','extLst'];
@@ -196,6 +250,60 @@ function configurePrint(sheet,wb,sheetname,lastCol,lastRow,paper){
   if(lastRow>75)setDefinedName(wb,'_xlnm.Print_Titles',`${escaped}!$11:$13`);
   return area;
 }
+// Preserve the original worksheet XML instead of reserializing all rows,
+// columns, merges, and layout metadata. Some Excel for Mac builds misrender
+// the entire sheet after a generic DOM serializer rewrites its worksheet XML.
+function serializePatchedSheet(original,doc,updates){
+  const root=doc.documentElement;
+  const markup=(element)=>XML.serializeToString(element);
+  let xml=original;
+
+  // Only update s= for cells whose initial static legend colors actually change.
+  if(updates&&updates.size){
+    xml=xml.replace(/<c\b[^>]*\br="([A-Z]+\d+)"[^>]*>/g,(tag,ref)=>{
+      if(!updates.has(ref))return tag;
+      const id=updates.get(ref);
+      return /\bs="\d+"/.test(tag)
+        ? tag.replace(/\bs="\d+"/,'s="'+id+'"')
+        : tag.replace(/^(<c\b)/,'$1 s="'+id+'"');
+    });
+  }
+
+  function singleton(name,next){
+    const updated=child(root,name);
+    if(!updated)return;
+    const replacement=markup(updated);
+    const pair=new RegExp('<'+name+'\\b[^>]*>[\\s\\S]*?<\\/'+name+'>');
+    const selfClosing=new RegExp('<'+name+'\\b[^>]*/>');
+    if(pair.test(xml))xml=xml.replace(pair,replacement);
+    else if(selfClosing.test(xml))xml=xml.replace(selfClosing,replacement);
+    else{
+      const marker=next.find(n=>new RegExp('<'+n+'\\b').test(xml));
+      if(marker)xml=xml.replace(new RegExp('(<'+marker+'\\b)'),replacement+'$1');
+      else xml=xml.replace('</worksheet>',replacement+'</worksheet>');
+    }
+  }
+  singleton('sheetPr',['dimension','sheetViews','sheetFormatPr','cols','sheetData']);
+  singleton('pageMargins',['pageSetup','headerFooter','rowBreaks','colBreaks','drawing','extLst']);
+  singleton('pageSetup',['headerFooter','rowBreaks','colBreaks','drawing','extLst']);
+
+  // Replace just the conditional-formatting blocks; keep all other XML verbatim.
+  xml=xml.replace(/<conditionalFormatting\b[^>]*>[\s\S]*?<\/conditionalFormatting>/g,'')
+    .replace(/<conditionalFormatting\b[^>]*\/>/g,'');
+  const rules=children(root,'conditionalFormatting').map(markup).join('');
+  if(rules){
+    const next=['dataValidations','hyperlinks','printOptions','pageMargins','pageSetup','headerFooter','rowBreaks','colBreaks','drawing','extLst']
+      .find(n=>new RegExp('<'+n+'\\b').test(xml));
+    if(next)xml=xml.replace(new RegExp('(<'+next+'\\b)'),rules+'$1');
+    else xml=xml.replace('</worksheet>',rules+'</worksheet>');
+  }
+  if(!child(root,'colBreaks'))xml=xml.replace(/<colBreaks\b[^>]*>[\s\S]*?<\/colBreaks>/g,'')
+    .replace(/<colBreaks\b[^>]*\/>/g,'');
+  // Keep all original <cols>, <row>, <mergeCell>, drawings and cached values byte-for-byte.
+  parse(xml,'preserved sheet');
+  return xml;
+}
+
 export async function transformWorkbook(name,buffer,mode,paper){
   const zip=await window.JSZip.loadAsync(buffer);
   for(const path of ['xl/workbook.xml','xl/styles.xml','xl/worksheets/sheet1.xml'])if(!zip.file(path))throw Error('Unsupported BAC template: '+path+' missing');
@@ -225,12 +333,16 @@ export async function transformWorkbook(name,buffer,mode,paper){
   const lastCol=columnName(Math.max(colNumber(cols[cols.length-1]),5));
   const sheetname=child(wb.documentElement,'sheets')?child(child(wb.documentElement,'sheets'),'sheet')?.getAttribute('name')||'Sheet1':'Sheet1';
   const area=configurePrint(sheet,wb,sheetname,lastCol,lastRow,paper);
-  let rules=0,cleared=0;
-  if(meta.mode){cleared=clearOldPaint(cells,styles,xfs,fills,cols,targets);rules=writeRules(sheet,styles,cols,items,totals,meta.mode,targets);}
+  let rules=0,cleared=0,staticColors=0,uncached=0,styleUpdates=new Map();
+  if(meta.mode){
+    const fallback=applyStaticFallback(cells,styles,xfs,fills,cols,items,targets,meta.mode,shared);
+    ({cleared,uncached}=fallback);staticColors=fallback.changed;styleUpdates=fallback.updates;
+    rules=writeRules(sheet,styles,cols,items,totals,meta.mode,targets);
+  }
   let calc=child(wb.documentElement,'calcPr');if(!calc){calc=node(wb,'calcPr');wb.documentElement.appendChild(calc);}
   calc.setAttribute('calcMode','auto');calc.setAttribute('fullCalcOnLoad','0');calc.setAttribute('forceFullCalc','0');
-  zip.file('xl/workbook.xml',serialize(wb),{createFolders:false});zip.file('xl/worksheets/sheet1.xml',serialize(sheet),{createFolders:false});
+  zip.file('xl/workbook.xml',serialize(wb),{createFolders:false});zip.file('xl/worksheets/sheet1.xml',serializePatchedSheet(sheetText,sheet,styleUpdates),{createFolders:false});
   if(meta.mode)zip.file('xl/styles.xml',serialize(styles),{createFolders:false});
   const data=await zip.generateAsync({type:'uint8array',compression:'DEFLATE',compressionOptions:{level:3}});
-  return {data,report:{file:name,mode:meta.mode||'REVIEW REQUIRED',basis:meta.basis,items:items.length,suppliers:cols.length,rules,cleared,printArea:area}};
+  return {data,report:{file:name,mode:meta.mode||'REVIEW REQUIRED',basis:meta.basis,items:items.length,suppliers:cols.length,rules,cleared,staticColors,uncached,printArea:area}};
 }
