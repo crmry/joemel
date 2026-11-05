@@ -11,15 +11,16 @@ The homepage opens the formatter directly at https://crmry.github.io/joemel/form
 1. Drop one or more BAC abstract-of-bids `.xlsx` workbooks into the page.
 2. Keep **Auto detect** to infer Line vs Lot Bid from workbook evidence, or explicitly select Line Bid or Lot Bid when the bidding documents require it.
 3. **Folio** is the default paper size. You can change it to Keep original, Legal, A4, or Letter.
-4. Choose a color mode:
+4. Choose **Page Setup** options: **Fit to 1 page wide** (default) or **Adjust to a percentage** (enter 70 to match the original PR template), portrait/landscape, and Header/Footer selections (**Keep original**, **None**, or centered **Page X of Y** footer). The original 25 PR templates contain legacy printer settings; the formatter unlinks those cached settings so Excel for Mac will read your newly chosen settings.
+5. Choose a color mode:
    - **Live colors:** uses Excel conditional formatting so colors update when bid amounts change. Some Excel for Mac installations may display conditional fills incorrectly.
    - **Mac compatibility (static colors):** writes visible Excel fill colors directly, avoiding conditional-fill rendering issues. Re-run conversion after changes to amounts because colors will not update automatically.
-5. Files are **formatted automatically upon upload**. Downloads use the **original uploaded `.xlsx` filenames** (no added `_formatted` suffix); duplicate filenames receive a number to avoid conflicts. Each successful result has a **Preview** action and its own **Download** button. Review its rendered worksheet before saving it.
-6. Click **Download All (.zip)** to save all successfully formatted workbooks plus the processing report. **Reprocess selected workbooks** can be used after changing settings.
+6. Files are **formatted automatically upon upload**. Downloads use the **original uploaded `.xlsx` filenames** (no added `_formatted` suffix); duplicate filenames receive a number to avoid conflicts. Each successful result has a **Preview** action and its own **Download** button. Review its rendered worksheet before saving it.
+7. Click **Download All (.zip)** to save all successfully formatted workbooks plus the processing report. **Reprocess selected workbooks** can be used after changing settings.
 
 The preview is a read-only worksheet representation showing cell values, merged cells and standard fill colors. It is **not a print-accurate representation of Excel**, and is limited to the first 65 rows and 32 columns. Users should confirm final pagination in Excel's Page Layout before printing.
 
-The formatter preserves worksheet values, formulas, merged cells and existing layout; configures the print area and one-page-wide scaling; and applies the legend: **1st (green), 2nd (yellow), 3rd (orange), Above ABC (pink)**. Line Bids rank by item, while Lot Bids rank on lot totals. Equal amounts share the same rank.
+The formatter preserves worksheet values, formulas, merged cells and existing layout; configures the print area and chosen scaling (Fit to Width or Adjust to %); and applies the legend: **1st (green), 2nd (yellow), 3rd (orange), Above ABC (pink)**. Line Bids rank by item, while Lot Bids rank on lot totals. Equal amounts share the same rank.
 
 All workbook data stays on the visitor's device and is processed in browser memory. No backend upload, database, or persistent file storage is used. Excel processing code loads only when formatting is requested.
 
