@@ -113,15 +113,31 @@ function ensureDxf(styles){
   const dxfs=children(dxfparent,'dxf'), ids=[];
   const allRanks=[...RANKS,['Neutral','FFFFFFFF']];
   for(const [,rgb] of allRanks){
-    let idx=dxfs.findIndex(dxf=>child(child(child(dxf,'fill'),'patternFill'),'fgColor')?.getAttribute('rgb')?.toUpperCase()===rgb);
+    // Differential fills (conditional formatting) are NOT ordinary cell fills.
+    // Excel for Mac may render <patternFill patternType="solid"><fgColor ...>
+    // as black. Excel's own conditional fill markup uses bgColor alone.
+    let idx=dxfs.findIndex(dxf=>{
+      const pattern=child(child(dxf,'fill'),'patternFill');
+      return [child(pattern,'bgColor')?.getAttribute('rgb'),child(pattern,'fgColor')?.getAttribute('rgb')]
+        .some(color=>color?.toUpperCase()===rgb);
+    });
     if(idx===-1){
-      const dxf=node(styles,'dxf'),fill=node(styles,'fill'),pattern=node(styles,'patternFill',{patternType:'solid'});
-      pattern.appendChild(node(styles,'fgColor',{rgb}));pattern.appendChild(node(styles,'bgColor',{indexed:'64'}));
-      fill.appendChild(pattern);dxf.appendChild(fill);dxfparent.appendChild(dxf);idx=dxfs.length;dxfs.push(dxf);
+      const dxf=node(styles,'dxf');dxfparent.appendChild(dxf);
+      idx=dxfs.length;dxfs.push(dxf);
     }
+    const dxf=dxfs[idx];
+    let fill=child(dxf,'fill');if(!fill){fill=node(styles,'fill');dxf.appendChild(fill);}
+    let pattern=child(fill,'patternFill');if(!pattern){pattern=node(styles,'patternFill');fill.appendChild(pattern);}
+    // Do not set patternType="solid" here: that is correct for a normal
+    // cell style, but incompatible with conditional fill rendering on Mac.
+    pattern.removeAttribute('patternType');
+    for(const fg of children(pattern,'fgColor'))pattern.removeChild(fg);
+    let bg=child(pattern,'bgColor');if(!bg){bg=node(styles,'bgColor');pattern.appendChild(bg);}
+    for(const attr of ['indexed','theme','tint','auto'])bg.removeAttribute(attr);
+    bg.setAttribute('rgb',rgb);
     ids.push(idx);
   }
-  dxfparent.setAttribute('count',dxfs.length);
+  dxfparent.setAttribute('count',String(dxfs.length));
   return ids;
 }
 function ensureFill(styles, rgb) {
