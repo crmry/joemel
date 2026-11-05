@@ -32,14 +32,18 @@ function safeFileName(name) {
   return String(name || 'workbook.xlsx').replace(/[\\/:\u0000-\u001f]/g, '_');
 }
 function formatNames(files) {
-  const used = new Map();
+  // Keep each actual PR filename. Add a short counter only for duplicate names
+  // so multiple copies never overwrite one another in Download All.
+  const used = new Set();
   return files.map(file => {
     const base = safeFileName(file.name).replace(/\.xlsx$/i, '');
-    const desired = base + '_formatted';
-    const key = desired.toLowerCase();
-    const duplicate = used.get(key) || 0;
-    used.set(key, duplicate + 1);
-    return desired + (duplicate ? ` (${duplicate + 1})` : '') + '.xlsx';
+    let candidate = base + '.xlsx';
+    let count = 2;
+    while (used.has(candidate.toLowerCase())) {
+      candidate = base + ' (' + count++ + ').xlsx';
+    }
+    used.add(candidate.toLowerCase());
+    return candidate;
   });
 }
 function choose(files) {
@@ -112,7 +116,7 @@ function addResult(entry, index) {
     const downloadButton = document.createElement('button');
     downloadButton.type = 'button';
     downloadButton.className = 'result-download';
-    downloadButton.textContent = 'Download';
+    downloadButton.textContent = 'Download .xlsx';
     downloadButton.dataset.index = String(index);
     downloadButton.dataset.action = 'download';
     downloadButton.setAttribute('aria-label', 'Download ' + entry.outputName);
