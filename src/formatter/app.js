@@ -20,7 +20,7 @@ ui.button.addEventListener('click',async()=>{
  let rows=[],outputs=[];
  try{
   ui.status.textContent='Loading local Excel formatter…';
-  const [JSZip,{transformWorkbook}]=await Promise.all([library(),import('./engine.js?v=1.0.2')]);
+  const [JSZip,{transformWorkbook}]=await Promise.all([library(),import('./engine.js?v=1.0.3')]);
   for(let i=0;i<selected.length;i++){
    const file=selected[i];ui.status.textContent=`Formatting ${i+1} of ${selected.length}: ${file.name}`;
    await yieldUi();
