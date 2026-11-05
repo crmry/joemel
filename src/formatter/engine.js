@@ -431,7 +431,7 @@ function serializePatchedSheet(original,doc,updates){
   return xml;
 }
 
-export async function transformWorkbook(name,buffer,mode,paper,colorMode="live",pageOptions={}){
+export async function transformWorkbook(name,buffer,mode,paper,colorMode="static",pageOptions={}){
   const zip=await window.JSZip.loadAsync(buffer);
   for(const path of ['xl/workbook.xml','xl/styles.xml','xl/worksheets/sheet1.xml'])if(!zip.file(path))throw Error('Unsupported BAC template: '+path+' missing');
   const [workbookText,stylesText,sheetText,sharedText]=await Promise.all([
