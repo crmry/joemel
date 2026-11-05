@@ -11,11 +11,10 @@ The homepage opens the formatter directly at https://crmry.github.io/joemel/form
 1. Drop one or more BAC abstract-of-bids `.xlsx` workbooks into the page.
 2. Keep **Auto detect** to infer Line vs Lot Bid from workbook evidence, or explicitly select Line Bid or Lot Bid when the bidding documents require it.
 3. **Folio** is the default paper size. You can change it to Keep original, Legal, A4, or Letter.
-4. **Standard colors (Windows & Mac)** is selected by default. It uses regular Excel cell fills for consistent display on both platforms. **Dynamic colors** is available if automatic recoloring after price edits is required.
-5. Choose **Page Setup** options: **Fit to 1 page wide** (default) or **Adjust to a percentage** (enter 70 to match the original PR template), portrait/landscape, and Header/Footer selections (**Keep original**, **None**, or centered **Page X of Y** footer). The original 25 PR templates contain legacy printer settings; the formatter unlinks those cached settings so Excel for Windows or Mac can read your newly chosen settings.
-5. Choose a color mode:
-   - **Dynamic colors:** uses Excel conditional formatting so ranking colors update when bid amounts change. Different Excel versions may render these rules differently; always verify the output.
-   - **Standard colors (Windows & Mac):** writes ordinary visible Excel cell fills directly, compatible with desktop Excel on Windows and Mac. Re-run conversion after changing amounts because these colors do not update automatically.
+4. Choose a color mode:
+   - **Standard colors (Windows & Mac)** (default): writes ordinary visible Excel cell fills that work across both desktop platforms. Re-run formatting after changing bid amounts because the colors remain fixed.
+   - **Dynamic colors:** uses conditional formatting so rankings update when bid amounts change. Display behavior may differ between Excel versions; verify the output.
+5. Choose **Page Setup** options: **Fit to 1 page wide** (default) or **Adjust to a percentage**, portrait/landscape, and Header/Footer selections. Folio and the original workbook layout remain supported. Old cached printer settings are unlinked to avoid overriding the chosen settings.
 6. Files are **formatted automatically upon upload**. Downloads use the **original uploaded `.xlsx` filenames** (no added `_formatted` suffix); duplicate filenames receive a number to avoid conflicts. Each successful result has a **Preview** action and its own **Download** button. Review its rendered worksheet before saving it.
 7. Click **Download All (.zip)** to save all successfully formatted workbooks plus the processing report. **Reprocess selected workbooks** can be used after changing settings.
 
