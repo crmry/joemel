@@ -12,6 +12,12 @@ const ui = {
   mode: document.getElementById('mode'),
   paper: document.getElementById('paper'),
   colorMode: document.getElementById('color-mode'),
+  scaling: document.getElementById('scaling'),
+  scalePercent: document.getElementById('scale-percent'),
+  scalePercentWrap: document.getElementById('scale-percent-wrap'),
+  orientation: document.getElementById('orientation'),
+  header: document.getElementById('header'),
+  footer: document.getElementById('footer'),
   downloads: document.getElementById('downloads-toolbar'),
   downloadCount: document.getElementById('download-count'),
   downloadAll: document.getElementById('download-all'),
@@ -195,7 +201,8 @@ async function showPreview(index) {
     const info = await renderWorkbookPreview(entry.data, ui.previewSheet, JSZip);
     if (activePreview !== index || !ui.preview.open) return;
     const paper = ui.paper.selectedOptions[0]?.textContent || 'Original';
-    ui.previewMeta.textContent = `${paper} paper · ${reportDetail(entry.report)} · Preview: ${info.rows} rows × ${info.cols} columns${info.truncated ? ' (limited view)' : ''}`;
+    const scaling = ui.scaling.value === 'adjust' ? ui.scalePercent.value + '% scaling' : 'fit 1 page wide';
+    ui.previewMeta.textContent = `${paper} paper · ${scaling} · ${reportDetail(entry.report)} · Preview: ${info.rows} rows × ${info.cols} columns${info.truncated ? ' (limited view)' : ''}`;
   } catch (error) {
     ui.previewMeta.textContent = 'Preview unavailable: ' + (error.message || String(error));
   }
@@ -222,14 +229,14 @@ async function processFiles() {
   ui.downloads.hidden = true;
   ui.input.disabled = true;
   ui.button.disabled = true;
-  [ui.mode, ui.paper, ui.colorMode].forEach(select => { select.disabled = true; });
+  [ui.mode, ui.paper, ui.colorMode, ui.scaling, ui.scalePercent, ui.orientation, ui.header, ui.footer].forEach(control => { control.disabled = true; });
   ui.drop.setAttribute('aria-busy', 'true');
   ui.progress.hidden = false;
   ui.progress.value = 0;
   try {
     ui.status.textContent = 'Loading Excel formatter…';
     const [, { transformWorkbook }] = await Promise.all([
-      library(), import('./engine.js?v=1.1.2')
+      library(), import('./engine.js?v=1.2.0')
     ]);
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -237,7 +244,14 @@ async function processFiles() {
       await yieldUi();
       let entry;
       try {
-        const result = await transformWorkbook(file.name, await file.arrayBuffer(), ui.mode.value, ui.paper.value, ui.colorMode.value);
+        const pageOptions = {
+          scaling: ui.scaling.value,
+          scalePercent: ui.scalePercent.value,
+          orientation: ui.orientation.value,
+          header: ui.header.value,
+          footer: ui.footer.value
+        };
+        const result = await transformWorkbook(file.name, await file.arrayBuffer(), ui.mode.value, ui.paper.value, ui.colorMode.value, pageOptions);
         entry = { report: result.report, data: result.data, outputName: outputNames[i] };
       } catch (error) {
         entry = {
@@ -259,12 +273,17 @@ async function processFiles() {
     processing = false;
     ui.input.disabled = false;
     ui.button.disabled = !selected.length;
-    [ui.mode, ui.paper, ui.colorMode].forEach(select => { select.disabled = false; });
+    [ui.mode, ui.paper, ui.colorMode, ui.scaling, ui.scalePercent, ui.orientation, ui.header, ui.footer].forEach(control => { control.disabled = false; });
     ui.drop.removeAttribute('aria-busy');
     refreshDownloadToolbar();
   }
 }
 ui.button.addEventListener('click', () => { void processFiles(); });
-for (const select of [ui.mode, ui.paper, ui.colorMode]) {
-  select.addEventListener('change', () => { if (selected.length && !processing) void processFiles(); });
+function updateScalingControl() {
+  ui.scalePercentWrap.hidden = ui.scaling.value !== 'adjust';
+}
+ui.scaling.addEventListener('change', updateScalingControl);
+updateScalingControl();
+for (const control of [ui.mode, ui.paper, ui.colorMode, ui.scaling, ui.scalePercent, ui.orientation, ui.header, ui.footer]) {
+  control.addEventListener('change', () => { if (selected.length && !processing) void processFiles(); });
 }
