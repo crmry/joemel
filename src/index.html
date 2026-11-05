@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Identify line, lot, and grouped bids from BAC abstract-of-bids Excel workbooks.">
+  <title>BAC Bid Basis Checker</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand-mark" aria-hidden="true">BAC</div>
+      <div>
+        <p class="eyebrow">Abstract of Bids Review</p>
+        <h1>Bid Basis Checker</h1>
+      </div>
+      <div class="privacy-pill"><span aria-hidden="true">●</span> Files stay in your browser</div>
+    </div>
+  </header>
+
+  <main>
+    <section class="intro" aria-labelledby="intro-title">
+      <div>
+        <p class="eyebrow">Excel workbook analyzer</p>
+        <h2 id="intro-title">Identify line, lot, and grouped bids from workbook evidence.</h2>
+        <p class="intro-copy">The checker reads item rows, bidder totals, formulas, ranking colors, and the workbook legend. It reports the cells supporting each result.</p>
+      </div>
+      <aside class="method-card" aria-label="Classification method">
+        <h3>How results are classified</h3>
+        <dl>
+          <div><dt><span class="method-dot line"></span>Line Bid</dt><dd>Ranks appear on item rows</dd></div>
+          <div><dt><span class="method-dot lot"></span>Lot Bid</dt><dd>Ranks appear on the final total</dd></div>
+          <div><dt><span class="method-dot grouped"></span>Grouped</dt><dd>Ranks appear on section subtotals</dd></div>
+        </dl>
+      </aside>
+    </section>
+
+    <section class="upload-card" aria-labelledby="upload-title">
+      <div id="drop-zone" class="drop-zone">
+        <div class="upload-icon" aria-hidden="true">⇧</div>
+        <h2 id="upload-title">Drop Excel workbooks here</h2>
+        <p>Select one or multiple <code>.xlsx</code> abstract-of-bids files.</p>
+        <input id="file-input" type="file" accept=".xlsx" multiple hidden>
+        <button id="browse-button" class="primary-button" type="button">Choose workbooks</button>
+      </div>
+      <p id="status" class="status" role="status" aria-live="polite">No workbook selected.</p>
+    </section>
+
+    <section id="results-section" class="results-section" aria-labelledby="results-title" hidden>
+      <div class="results-heading">
+        <div>
+          <p class="eyebrow">Review output</p>
+          <h2 id="results-title">Classification results</h2>
+        </div>
+        <div class="actions">
+          <button id="export-button" class="secondary-button" type="button">Export CSV</button>
+          <button id="clear-button" class="text-button" type="button">Clear</button>
+        </div>
+      </div>
+
+      <div id="summary" class="summary-grid"></div>
+
+      <div id="filters" class="filters" aria-label="Filter classifications">
+        <button class="active" data-filter="All" type="button">All</button>
+        <button data-filter="Line Bid" type="button">Line Bid</button>
+        <button data-filter="Lot Bid" type="button">Lot Bid</button>
+        <button data-filter="Grouped/Section Bid" type="button">Grouped</button>
+        <button data-filter="Needs Review" type="button">Needs Review</button>
+      </div>
+
+      <div class="table-card table-scroll">
+        <table class="results-table">
+          <thead>
+            <tr><th>Workbook</th><th>Bid basis</th><th>Confidence</th><th>Evidence summary</th><th></th></tr>
+          </thead>
+          <tbody id="results-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="review-note" aria-labelledby="review-title">
+      <div class="review-icon" aria-hidden="true">i</div>
+      <div>
+        <h2 id="review-title">Review the evidence before making a procurement decision</h2>
+        <p>This checker interprets workbook formulas and formatting. It does not replace the approved bidding documents, BAC resolutions, or applicable procurement rules.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>BAC Bid Basis Checker · Browser-only workbook analysis</p>
+  </footer>
+
+  <script src="./vendor/jszip.min.js"></script>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

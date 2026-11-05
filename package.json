@@ -1,0 +1,15 @@
+{
+  "name": "joemel-bid-basis-checker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Browser-only Excel bid basis classifier for BAC abstract-of-bids workbooks.",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "verify": "npm run test && npm run build"
+  },
+  "dependencies": {
+    "jszip": "3.10.1"
+  }
+}
