@@ -212,6 +212,8 @@ function rankOrder(rank) {
   return { "1st": 1, "2nd": 2, "3rd": 3, "Above ABC": 4 }[rank] || 99;
 }
 
+const PARTICIPATION_NOTE = "Blank or uncolored bidder cells are neutral. They may indicate that no offer was submitted for that item and do not determine the bid basis.";
+
 function formulaCoversItemRange(formula, column, minItemRow, maxItemRow) {
   if (!formula) return false;
   const columnName = columnLetters(column);
@@ -286,16 +288,16 @@ function analyzeSheet({ cells, sheetName, fileName }) {
 
   if (oneFinalAggregateRow) {
     classification = "Lot Bid";
-    reason = `Ranking colors appear only on the final aggregate bidder totals in row ${subtotalRows[0]}, covering the complete item schedule.`;
+    reason = `Ranking colors appear only on the final aggregate bidder totals in row ${subtotalRows[0]}, covering the complete item schedule. Missing item-level colors do not change the lot-bid basis.`;
     confidence = legend.found >= 3 ? "High" : "Medium";
   } else if (rankCells.length > 0) {
     classification = "Line Bid";
     if (itemRanks.length > 0 && subtotalRanks.length === 0) {
-      reason = `Ranking colors are applied to calculated bidder totals on ${new Set(itemRanks.map((cell) => cell.row)).size} individual item row(s).`;
+      reason = `Ranking colors are applied to calculated bidder totals on ${new Set(itemRanks.map((cell) => cell.row)).size} individual item row(s). Uncolored bidder cells do not change the line-bid basis.`;
     } else if (itemRanks.length === 0 && subtotalRows.length > 0) {
-      reason = `Ranking colors appear on supporting section subtotal rows ${subtotalRows.join(", ")} within the numbered line-item schedule; there is no single ranked total for the whole PR.`;
+      reason = `Ranking colors appear on supporting section subtotal rows ${subtotalRows.join(", ")} within the numbered line-item schedule; there is no single ranked total for the whole PR. Uncolored bidder cells do not change the line-bid basis.`;
     } else {
-      reason = "Ranking evidence appears on line items and supporting subtotals rather than only on one final aggregate total.";
+      reason = "Ranking evidence appears on line items and supporting subtotals rather than only on one final aggregate total. Uncolored bidder cells do not change the line-bid basis.";
     }
     confidence = legend.found >= 3 ? "High" : "Medium";
   }
@@ -313,6 +315,7 @@ function analyzeSheet({ cells, sheetName, fileName }) {
     reason,
     itemCount: itemRows.length,
     bidderCount: totalColumns.length,
+    participationNote: PARTICIPATION_NOTE,
     itemRows,
     rankedCells,
     evidenceCells: rankedCells.map((cell) => cell.reference),

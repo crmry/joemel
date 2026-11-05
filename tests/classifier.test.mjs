@@ -46,6 +46,7 @@ test("PR 1 treats section subtotals as supporting evidence for a line bid", asyn
   assert.equal(result.classification, "Line Bid");
   assert.deepEqual(result.evidenceCells.sort(), ["G20", "G24", "I20", "I24"]);
   assert.match(result.reason, /supporting section subtotal rows 20, 24/i);
+  assert.match(result.participationNote, /do not determine the bid basis/i);
 });
 
 test("PR 9 exposes aggregate ranking evidence in row 24", async () => {
@@ -55,6 +56,8 @@ test("PR 9 exposes aggregate ranking evidence in row 24", async () => {
   assert.deepEqual(result.evidenceCells.sort(), ["G24", "K24", "O24"]);
   assert.equal(result.itemCount, 7);
   assert.equal(result.bidderCount, 5);
+  assert.equal(result.rankedCells.length, 3);
+  assert.match(result.reason, /missing item-level colors do not change the lot-bid basis/i);
 });
 
 test("invalid input returns an actionable workbook error", async () => {

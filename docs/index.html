@@ -202,6 +202,7 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 .details-row td { padding: 0; background: #f8fafc; }
 .evidence-panel { padding: 18px; }
 .evidence-meta { display: flex; flex-wrap: wrap; gap: 12px 24px; margin-bottom: 12px; color: var(--muted); font-size: .84rem; }
+.participation-note { margin: 0 0 12px; padding: 10px 12px; border-left: 3px solid var(--blue); background: var(--blue-soft); color: #36566c; font-size: .82rem; }
 .evidence-scroll { border: 1px solid var(--line); border-radius: 9px; background: white; }
 .evidence-table { min-width: 760px; }
 .evidence-table td { font-size: .82rem; }
@@ -251,13 +252,13 @@ footer { padding: 24px 20px; border-top: 1px solid var(--line); color: var(--mut
       <div>
         <p class="eyebrow">Excel workbook analyzer</p>
         <h2 id="intro-title">Identify line and lot bids from workbook evidence.</h2>
-        <p class="intro-copy">The checker reads item rows, bidder totals, formulas, ranking colors, and the workbook legend. It reports the cells supporting each result.</p>
+        <p class="intro-copy">The checker reads item rows, bidder totals, formulas, ranking colors, and the workbook legend. It reports the cells supporting each result. Blank or uncolored bidder cells are treated as participation gaps, not as a different bid basis.</p>
       </div>
       <aside class="method-card" aria-label="Classification method">
         <h3>How results are classified</h3>
         <dl>
-          <div><dt><span class="method-dot line"></span>Line Bid</dt><dd>Ranks item lines or supporting subtotals</dd></div>
-          <div><dt><span class="method-dot lot"></span>Lot Bid</dt><dd>Ranks appear on the final total</dd></div>
+          <div><dt><span class="method-dot line"></span>Line Bid</dt><dd>Ranks eligible bids by item or supporting subtotal</dd></div>
+          <div><dt><span class="method-dot lot"></span>Lot Bid</dt><dd>Ranks eligible bids on the final whole-PR total</dd></div>
           <div><dt><span class="method-dot review"></span>Needs Review</dt><dd>Evidence is absent or conflicting</dd></div>
         </dl>
       </aside>

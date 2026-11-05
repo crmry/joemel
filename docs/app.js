@@ -75,6 +75,7 @@ function renderEvidence(result) {
         <span>Bidders: <strong>${result.bidderCount}</strong></span>
         <span>Legend entries: <strong>${result.legendEntriesFound}/4</strong></span>
       </div>
+      <p class="participation-note">${escapeHtml(result.participationNote)}</p>
       <div class="table-scroll evidence-scroll">
         <table class="evidence-table">
           <thead><tr><th>Cell</th><th>Rank</th><th>Bidder</th><th>Calculated value</th><th>Formula</th></tr></thead>
@@ -165,7 +166,7 @@ function csvValue(value) {
 }
 
 function exportCsv() {
-  const header = ["File", "PR number", "Classification", "Confidence", "Items", "Bidders", "Evidence cells", "Reason"];
+  const header = ["File", "PR number", "Classification", "Confidence", "Items", "Bidders", "Evidence cells", "Reason", "Participation note"];
   const rows = state.results.map((result) => [
     result.fileName,
     result.prNumber,
@@ -175,6 +176,7 @@ function exportCsv() {
     result.bidderCount ?? "",
     result.evidenceCells?.join(" ") || "",
     result.reason,
+    result.participationNote || "",
   ]);
   const csv = [header, ...rows].map((row) => row.map(csvValue).join(",")).join("\r\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });

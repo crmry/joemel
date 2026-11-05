@@ -1,6 +1,6 @@
 {
   "name": "joemel-bid-basis-checker",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "type": "module",
   "description": "Browser-only Excel bid basis classifier for BAC abstract-of-bids workbooks.",

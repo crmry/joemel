@@ -14,6 +14,8 @@ The analyzer reads the workbook locally in the visitor's browser. It does not up
 - **Lot Bid:** ranking colors occur only on one final aggregate bidder-total row covering the complete item schedule.
 - **Needs Review:** evidence is absent, conflicting, or does not match the supported BAC workbook structure.
 
+Blank or uncolored bidder cells are neutral. They may mean that a supplier did not submit an offer for that item. The classifier determines the bid basis from where the available rankings are applied, not from whether every bidder or item has a color.
+
 Each result includes the exact ranked cells, formula, supplier name, and cached calculated value.
 
 ## Local verification
