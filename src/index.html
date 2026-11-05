@@ -1,105 +1,16 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Identify line and lot bids from BAC abstract-of-bids Excel workbooks.">
-  <title>BAC Bid Basis Checker</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23102a43'/%3E%3Ctext x='32' y='39' text-anchor='middle' font-family='Arial' font-size='20' font-weight='700' fill='white'%3EBAC%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="./styles.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="BAC Excel Color & Page Setup Fixer — private in-browser workbook formatting.">
+  <title>BAC | Color &amp; Page Setup Fixer</title>
+  <meta http-equiv="refresh" content="0; url=./formatter/">
+  <script>location.replace(new URL("./formatter/", location.href));</script>
 </head>
 <body>
-  <header class="site-header">
-    <div class="header-inner">
-      <div class="brand-mark" aria-hidden="true">BAC</div>
-      <div>
-        <p class="eyebrow">Abstract of Bids Review</p>
-        <h1>Bid Basis Checker</h1>
-      </div>
-      <a class="formatter-link" href="./formatter/">Color &amp; Page Setup Fixer</a>
-      <div class="privacy-pill"><span aria-hidden="true">●</span> Files stay in your browser</div>
-    </div>
-  </header>
-
   <main>
-    <section class="intro" aria-labelledby="intro-title">
-      <div>
-        <p class="eyebrow">Excel workbook analyzer</p>
-        <h2 id="intro-title">Identify line and lot bids from workbook evidence.</h2>
-        <p class="intro-copy">The checker reads item rows, bidder totals, formulas, ranking colors, and the workbook legend. It reports the cells supporting each result. Blank or uncolored bidder cells are treated as participation gaps, not as a different bid basis.</p>
-      </div>
-      <aside class="method-card" aria-label="Classification method">
-        <h3>How results are classified</h3>
-        <dl>
-          <div><dt><span class="method-dot line"></span>Line Bid</dt><dd>Ranks eligible bids by item or supporting subtotal</dd></div>
-          <div><dt><span class="method-dot lot"></span>Lot Bid</dt><dd>Ranks eligible bids on the final whole-PR total</dd></div>
-          <div><dt><span class="method-dot review"></span>Needs Review</dt><dd>Evidence is absent or conflicting</dd></div>
-        </dl>
-      </aside>
-    </section>
-
-    <section class="upload-card" aria-labelledby="upload-title">
-      <div id="drop-zone" class="drop-zone">
-        <div class="upload-icon" aria-hidden="true">⇧</div>
-        <h2 id="upload-title">Drop Excel workbooks here</h2>
-        <p>Select one or multiple <code>.xlsx</code> abstract-of-bids files.</p>
-        <input id="file-input" type="file" accept=".xlsx" multiple hidden>
-        <button id="browse-button" class="primary-button" type="button">Choose workbooks</button>
-      </div>
-      <p id="status" class="status" role="status" aria-live="polite">No workbook selected.</p>
-    </section>
-
-    <section id="results-section" class="results-section" aria-labelledby="results-title" hidden>
-      <div class="results-heading">
-        <div>
-          <p class="eyebrow">Review output</p>
-          <h2 id="results-title">Classification results</h2>
-        </div>
-        <div class="actions">
-          <button id="export-button" class="secondary-button" type="button">Export CSV</button>
-          <button id="clear-button" class="text-button" type="button">Clear</button>
-        </div>
-      </div>
-
-      <div id="summary" class="summary-grid"></div>
-
-      <div id="filters" class="filters" aria-label="Filter classifications">
-        <button class="active" data-filter="All" type="button">All</button>
-        <button data-filter="Line Bid" type="button">Line Bid</button>
-        <button data-filter="Lot Bid" type="button">Lot Bid</button>
-        <button data-filter="Needs Review" type="button">Needs Review</button>
-        <label for="pr-filter" class="bac-extra-filter">PR <select id="pr-filter" aria-label="Filter by PR number"><option value="All">All PRs</option></select></label>
-        <label for="sort-order" class="bac-extra-filter">Sort <select id="sort-order" aria-label="Sort results">
-          <option value="ascending">PR 1–25</option>
-          <option value="descending">PR 25–1</option>
-          <option value="filename">File name A–Z</option>
-        </select></label>
-      </div>
-
-      <div class="table-card table-scroll">
-        <table class="results-table">
-          <thead>
-            <tr><th>Workbook</th><th>Bid basis</th><th>Confidence</th><th>Evidence summary</th><th></th></tr>
-          </thead>
-          <tbody id="results-body"></tbody>
-        </table>
-      </div>
-    </section>
-
-    <section class="review-note" aria-labelledby="review-title">
-      <div class="review-icon" aria-hidden="true">i</div>
-      <div>
-        <h2 id="review-title">Review the evidence before making a procurement decision</h2>
-        <p>This checker interprets workbook formulas and formatting. It does not replace the approved bidding documents, BAC resolutions, or applicable procurement rules.</p>
-      </div>
-    </section>
+    <p>Opening <a href="./formatter/">BAC Color &amp; Page Setup Fixer</a>…</p>
   </main>
-
-  <footer>
-    <p>BAC Bid Basis Checker · Browser-only workbook analysis</p>
-  </footer>
-
-  <script src="./vendor/jszip.min.js"></script>
-  <script type="module" src="./app.js?v=1.0.3"></script>
 </body>
 </html>
