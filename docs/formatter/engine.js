@@ -263,6 +263,19 @@ function configurePrint(sheet,wb,sheetname,lastCol,lastRow,paper){
   if(paper!=='preserve')page.setAttribute('paperSize',PAPERS[paper]);
   else if(!page.getAttribute('paperSize'))page.setAttribute('paperSize','14');
   page.setAttribute('orientation','landscape');page.setAttribute('fitToWidth','1');page.setAttribute('fitToHeight','0');page.setAttribute('pageOrder','overThenDown');page.removeAttribute('scale');
+  // Old BAC templates embed printerSettings1.bin and reference it from pageSetup.
+  // That cached legacy 70% scale may override the new fit-to-width settings in Excel for Mac.
+  page.removeAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','id');
+  page.removeAttribute('r:id');
+  // The PR templates already have "Page &P of &N", but no explicit footer alignment.
+  // Make the original page-number footer a proper centered footer for Excel for Mac.
+  const hf=child(root,'headerFooter');
+  const footer=child(hf,'oddFooter');
+  if(footer&&/^Page\s*&P\s+of\s+&N$/i.test((footer.textContent||'').trim())){
+    footer.textContent='&CPage &P of &N';
+    hf.setAttribute('alignWithMargins','1');
+    hf.setAttribute('scaleWithDoc','1');
+  }
   const breaks=child(root,'colBreaks');if(breaks)root.removeChild(breaks);
   const escaped="'"+sheetname.replace(/'/g,"''")+"'";
   const area=`${escaped}!$A$1:$${lastCol}$${lastRow}`;
@@ -306,6 +319,7 @@ function serializePatchedSheet(original,doc,updates){
   singleton('sheetPr',['dimension','sheetViews','sheetFormatPr','cols','sheetData']);
   singleton('pageMargins',['pageSetup','headerFooter','rowBreaks','colBreaks','drawing','extLst']);
   singleton('pageSetup',['headerFooter','rowBreaks','colBreaks','drawing','extLst']);
+  singleton('headerFooter',['rowBreaks','colBreaks','drawing','extLst']);
 
   // Replace just the conditional-formatting blocks; keep all other XML verbatim.
   xml=xml.replace(/<conditionalFormatting\b[^>]*>[\s\S]*?<\/conditionalFormatting>/g,'')
@@ -364,6 +378,16 @@ export async function transformWorkbook(name,buffer,mode,paper,colorMode="live")
   calc.setAttribute('calcMode','auto');calc.setAttribute('fullCalcOnLoad','0');calc.setAttribute('forceFullCalc','0');
   zip.file('xl/workbook.xml',serialize(wb),{createFolders:false});zip.file('xl/worksheets/sheet1.xml',serializePatchedSheet(sheetText,sheet,styleUpdates),{createFolders:false});
   if(meta.mode)zip.file('xl/styles.xml',serialize(styles),{createFolders:false});
+  // Unlink obsolete binary printer settings, which may otherwise restore a
+  // cached percent scale even though pageSetup now requests fit-to-width.
+  const relsPath='xl/worksheets/_rels/sheet1.xml.rels';
+  if(zip.file(relsPath)){
+    const relDoc=parse(await zip.file(relsPath).async('string'),'sheet relationships');
+    const stale=Array.from(relDoc.documentElement.children).filter(e=>
+      e.localName==='Relationship'&&/\/printerSettings$/.test(e.getAttribute('Type')||''));
+    for(const relation of stale)relation.remove();
+    if(stale.length)zip.file(relsPath,serialize(relDoc),{createFolders:false});
+  }
   const data=await zip.generateAsync({type:'uint8array',compression:'DEFLATE',compressionOptions:{level:3}});
   return {data,report:{file:name,mode:meta.mode||'REVIEW REQUIRED',basis:meta.basis,colorMode,items:items.length,suppliers:cols.length,rules,cleared,staticColors,uncached,printArea:area}};
 }
