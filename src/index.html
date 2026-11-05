@@ -67,6 +67,12 @@
         <button data-filter="Line Bid" type="button">Line Bid</button>
         <button data-filter="Lot Bid" type="button">Lot Bid</button>
         <button data-filter="Needs Review" type="button">Needs Review</button>
+        <label for="pr-filter" class="bac-extra-filter">PR <select id="pr-filter" aria-label="Filter by PR number"><option value="All">All PRs</option></select></label>
+        <label for="sort-order" class="bac-extra-filter">Sort <select id="sort-order" aria-label="Sort results">
+          <option value="ascending">PR 1–25</option>
+          <option value="descending">PR 25–1</option>
+          <option value="filename">File name A–Z</option>
+        </select></label>
       </div>
 
       <div class="table-card table-scroll">
@@ -93,6 +99,6 @@
   </footer>
 
   <script src="./vendor/jszip.min.js"></script>
-  <script type="module" src="./app.js?v=1.0.2"></script>
+  <script type="module" src="./app.js?v=1.0.3"></script>
 </body>
 </html>
