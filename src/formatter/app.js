@@ -229,7 +229,7 @@ async function processFiles() {
   try {
     ui.status.textContent = 'Loading Excel formatter…';
     const [, { transformWorkbook }] = await Promise.all([
-      library(), import('./engine.js?v=1.0.4')
+      library(), import('./engine.js?v=1.1.2')
     ]);
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
