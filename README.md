@@ -35,6 +35,8 @@ The regression tests use the BAC workbooks in `/Users/crimary/Documents/BAC/Octo
 
 The generated site is stored in `docs/`.
 
+The build embeds the stylesheet in `docs/index.html` to avoid a separate render-blocking request on slower GitHub Pages connections.
+
 1. Push this repository to GitHub as `crmry/joemel`.
 2. Open **Settings → Pages**.
 3. Under **Build and deployment**, select **Deploy from a branch**.
