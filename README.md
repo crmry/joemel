@@ -1,71 +1,40 @@
-# Joemel BAC Bid Basis Checker
+# BAC Color & Page Setup Fixer
 
-A browser-only GitHub Pages tool that classifies BAC abstract-of-bids Excel workbooks as:
+A single, browser-based Excel formatter for BAC abstract-of-bids purchase requisitions. The separate Bid Basis Checker page has been retired because Line Bid / Lot Bid recognition is already part of the formatter.
 
-- Line Bid
-- Lot Bid
-- Needs Review
+**Website:** https://crmry.github.io/joemel/
 
-The analyzer reads the workbook locally in the visitor's browser. It does not upload workbook data to a server.
+The homepage opens the formatter directly at https://crmry.github.io/joemel/formatter/.
 
-## How the classification works
+## How it works
 
-- **Line Bid:** ranking evidence occurs on numbered item lines or supporting section subtotals, without one ranked total for the complete PR.
-- **Lot Bid:** ranking colors occur only on one final aggregate bidder-total row covering the complete item schedule.
-- **Needs Review:** evidence is absent, conflicting, or does not match the supported BAC workbook structure.
+1. Drop one or more BAC abstract-of-bids `.xlsx` workbooks into the page.
+2. Keep **Auto detect** to infer Line vs Lot Bid from workbook evidence, or explicitly select Line Bid or Lot Bid when the bidding documents require it.
+3. Keep the original paper size (recommended), or select a print paper size.
+4. Choose a color mode:
+   - **Live colors:** uses Excel conditional formatting so colors update when bid amounts change. Some Excel for Mac installations may display conditional fills incorrectly.
+   - **Mac compatibility (static colors):** writes visible Excel fill colors directly, avoiding conditional-fill rendering issues. Re-run conversion after changes to amounts because colors will not update automatically.
+5. Click **Format & Download** to receive the processed workbook or a ZIP for multiple workbooks.
 
-Blank or uncolored bidder cells are neutral. They may mean that a supplier did not submit an offer for that item. The classifier determines the bid basis from where the available rankings are applied, not from whether every bidder or item has a color.
+The formatter preserves worksheet values, formulas, merged cells and existing layout; configures the print area and one-page-wide scaling; and applies the legend: **1st (green), 2nd (yellow), 3rd (orange), Above ABC (pink)**. Line Bids rank by item, while Lot Bids rank on lot totals. Equal amounts share the same rank.
 
-Each result includes the exact ranked cells, formula, supplier name, and cached calculated value.
+All workbook data stays on the visitor's device and is processed in browser memory. No backend upload, database, or persistent file storage is used. Excel processing code loads only when formatting is requested.
 
-## Local verification
+## Deployment
+
+GitHub Pages publishes the `main` branch's `/docs` directory. The source application lives in `src/formatter/`, and the publishable copy lives in `docs/formatter/`. The root page `src/index.html` redirects to the formatter.
+
+To rebuild with Node.js:
 
 ```bash
 npm install
-npm run verify
+npm run build
 ```
 
-The regression tests use the BAC workbooks in `/Users/crimary/Documents/BAC/October 8, 2026 Abstract of Bids PB 02-2027_edited` and expect:
+The build copies only the formatter and bundled JSZip dependency into `docs/`, excluding the retired Bid Basis Checker application.
 
-- PR 1–8: Line Bid
-- PR 9: Lot Bid
+The legacy `src/classifier-core.js` is retained only for the existing regression tests; it is not shipped to GitHub Pages or used by the formatter. Those tests depend on local sample workbooks and may require the original test fixtures to be available.
 
-## GitHub Pages
+## Caution
 
-The generated site is stored in `docs/`.
-
-The build embeds the stylesheet in `docs/index.html` to avoid a separate render-blocking request on slower GitHub Pages connections.
-
-1. Push this repository to GitHub as `crmry/joemel`.
-2. Open **Settings → Pages**.
-3. Under **Build and deployment**, select **Deploy from a branch**.
-4. Select the `main` branch and `/docs` folder, then save.
-
-The project URL will be `https://crmry.github.io/joemel/`.
-
-## Scope
-
-The tool is a workbook-evidence checker. It does not replace approved bidding documents, BAC resolutions, or applicable procurement rules.
-
-## Color & Page Setup Fixer
-
-The same GitHub Pages website also provides the [BAC Color & Page Setup Fixer](https://crmry.github.io/joemel/formatter/).
-
-- Drop one or more BAC abstract-of-bids `.xlsx` workbooks.
-- Select **Auto detect**, or override the bidding classification as **Line Bid** or **Lot Bid** when documentary evidence requires it.
-- Choose **Keep original** paper size (recommended) or a specific paper size.
-- Click **Format & Download**. One file downloads as a formatted workbook; multiple files download as a ZIP with a processing report.
-- The formatter preserves cell values and formulas, sets print area and landscape one-page-wide scaling, and writes live legend-based conditional formatting (1st, 2nd, 3rd, Above ABC).
-
-All processing happens in the browser. Excel files are never sent to GitHub Pages or stored on a server. The Excel ZIP library and editing engine load only when conversion is requested.
-
-The browser formatter is maintained in `src/formatter/`, with the corresponding deployable copy in `docs/formatter/`. The existing build script copies `src` to `docs`. The engine is designed for these BAC comparison templates, not arbitrary spreadsheet layouts. Automatic classification of PR 10 and above is inferred from workbook evidence and should be checked against official bid documents.
-
-## Excel for Mac display compatibility
-
-Version 1.0.4 provides two coloring options on the formatter page:
-
-- **Live colors (update in Excel):** writes dynamic conditional rules with differential background fills (`bgColor`, not normal `fgColor` solid fills) to address black cells in Excel for Mac.
-- **Mac compatibility (static colors):** calculates each ranking during conversion, removes the formatter's live conditional rules, and writes ordinary colored cell styles. The colors are visible in Excel without conditional-format rendering, but do not auto-update when users edit bid amounts; re-run the formatter after changes.
-
-Both modes preserve the original workbook data, formulas, row/column layout, and merged ranges. For an existing broken download, reprocess the original .xlsx file and choose Mac compatibility mode. This is a local-only browser process; no workbook is stored on GitHub Pages.
+Automatic bid classification for unfamiliar PR templates may be uncertain. Confirm Line/Lot classification against the official procurement documents and review the output before using it in BAC proceedings.
