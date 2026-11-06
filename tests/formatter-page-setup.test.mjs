@@ -54,10 +54,10 @@ test('How it works shows three concise steps', () => {
   assert.match(html, /Files stay on your device/);
 });
 
-test('Product header uses one clear title and identifies the committee', () => {
-  assert.match(html, /Bids and Awards Committee/);
+test('Product page starts with one title and no unnecessary top bar', () => {
   assert.equal((html.match(/<h1>PR Auto-Formatter<\/h1>/g) || []).length, 1);
-  assert.doesNotMatch(html, /Procurement tools|PR AUTO-FORMATTER|PURCHASE REQUISITIONS/);
+  assert.doesNotMatch(html, /class="topbar"|class="brand"|class="brand-mark"|Bids and Awards Committee/);
+  assert.doesNotMatch(css, /\.topbar\{|\.brand\{|\.brand-mark\{/);
   assert.match(html, /Format abstract-of-bids Excel workbooks/);
   assert.match(html, /class="legend-chip"/);
   assert.match(html, /class="workflow-steps"/);
