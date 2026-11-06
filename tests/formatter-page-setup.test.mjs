@@ -55,7 +55,7 @@ test('How it works shows three concise steps', () => {
 });
 
 test('Product page starts with one title and no unnecessary top bar', () => {
-  assert.equal((html.match(/<h1>Purchase Request (PR) Formatting Tool<\/h1>/g) || []).length, 1);
+  assert.equal((html.match(/<h1>Purchase Request \(PR\) Formatting Tool<\/h1>/g) || []).length, 1);
   assert.doesNotMatch(html, /class="topbar"|class="brand"|class="brand-mark"|Bids and Awards Committee/);
   assert.doesNotMatch(css, /\.topbar\{|\.brand\{|\.brand-mark\{/);
   assert.match(html, /Format abstract-of-bids Excel workbooks/);
