@@ -55,10 +55,18 @@ test('How it works shows three concise steps', () => {
 });
 
 test('Product page starts with one title and no unnecessary top bar', () => {
-  assert.equal((html.match(/<h1>PR Auto-Formatter<\/h1>/g) || []).length, 1);
+  assert.equal((html.match(/<h1>Purchase Request (PR) Formatting Tool<\/h1>/g) || []).length, 1);
   assert.doesNotMatch(html, /class="topbar"|class="brand"|class="brand-mark"|Bids and Awards Committee/);
   assert.doesNotMatch(css, /\.topbar\{|\.brand\{|\.brand-mark\{/);
   assert.match(html, /Format abstract-of-bids Excel workbooks/);
   assert.match(html, /class="legend-chip"/);
   assert.match(html, /class="workflow-steps"/);
+});
+
+test('Product identity consistently uses Purchase Request (PR) Formatting Tool', () => {
+  const label = 'Purchase Request (PR) Formatting Tool';
+  assert.match(html, /<h1>Purchase Request \(PR\) Formatting Tool<\/h1>/);
+  assert.ok(html.includes('<title>BAC | ' + label + '</title>'));
+  assert.ok(html.includes('BAC · ' + label));
+  assert.doesNotMatch(html, /PR Auto-Formatter/);
 });

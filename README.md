@@ -1,6 +1,6 @@
-# BAC PR Auto-Formatter
+# BAC Purchase Request (PR) Formatting Tool
 
-A single, browser-based Excel formatter for BAC abstract-of-bids purchase requisitions. The separate Bid Basis Checker page has been retired because Line Bid / Lot Bid recognition is already part of the formatter.
+A single, browser-based Excel formatter for BAC abstract-of-bids purchase requests. The separate Bid Basis Checker page has been retired because Line Bid / Lot Bid recognition is already part of the formatter.
 
 **Website:** https://crmry.github.io/joemel/
 
