@@ -11,9 +11,7 @@ The homepage opens the formatter directly at https://crmry.github.io/joemel/form
 1. Drop one or more BAC abstract-of-bids `.xlsx` workbooks into the page.
 2. Keep **Auto detect** to infer Line vs Lot Bid from workbook evidence, or explicitly select Line Bid or Lot Bid when the bidding documents require it.
 3. **Folio** is the default paper size. You can change it to Keep original, Legal, A4, or Letter.
-4. Choose a color mode:
-   - **Standard colors (Windows & Mac)** (default): writes ordinary visible Excel cell fills that work across both desktop platforms. Re-run formatting after changing bid amounts because the colors remain fixed.
-   - **Dynamic colors:** uses conditional formatting so rankings update when bid amounts change. Display behavior may differ between Excel versions; verify the output.
+4. **Standard colors (Windows & Mac)** are automatically used for every workbook. The former Color Update Mode control has been replaced by the **Legend** (green 1st, yellow 2nd, orange 3rd, pink Above ABC) alongside the visible formatting options. Reprocess workbooks if bid prices change, because the colors remain fixed.
 5. **Page Setup is hidden and automatic**: all workbooks use **Adjust to 70%**, **Landscape**, and **Keep original** for headers and footers. Paper size still defaults to Folio, and obsolete cached printer settings are unlinked.
 6. Files are **formatted automatically upon upload**. Downloads use the **original uploaded `.xlsx` filenames** (no added `_formatted` suffix); duplicate filenames receive a number to avoid conflicts. Each successful result has a **Preview** action and its own **Download** button. Review its rendered worksheet before saving it.
 7. Click **Download All (.zip)** to save all successfully formatted workbooks plus the processing report. **Reprocess selected workbooks** can be used after changing settings.

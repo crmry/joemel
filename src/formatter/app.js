@@ -11,7 +11,6 @@ const ui = {
   results: document.getElementById('results'),
   mode: document.getElementById('mode'),
   paper: document.getElementById('paper'),
-  colorMode: document.getElementById('color-mode'),
   downloads: document.getElementById('downloads-toolbar'),
   downloadCount: document.getElementById('download-count'),
   downloadAll: document.getElementById('download-all'),
@@ -60,6 +59,7 @@ function choose(files) {
   ui.downloads.hidden = true;
   ui.progress.hidden = true;
   ui.button.disabled = !selected.length;
+  ui.button.hidden = !selected.length;
   if (selected.length) void processFiles();
 }
 ui.input.addEventListener('change', () => { choose(ui.input.files); ui.input.value = ''; });
@@ -91,7 +91,7 @@ async function library() {
 function reportDetail(r) {
   if (r.mode === 'ERROR') return r.basis || 'Could not process this workbook';
   const className = r.mode === 'line' ? 'Line Bid' : r.mode === 'lot' ? 'Lot Bid' : 'Needs classification review';
-  const color = r.colorMode === 'static' ? 'Standard Excel colors' : 'Dynamic Excel colors';
+  const color = 'Standard Excel colors';
   return `${className} · ${color} · ${r.items ?? 0} items · ${r.basis || ''}`;
 }
 function addResult(entry, index) {
@@ -223,14 +223,14 @@ async function processFiles() {
   ui.downloads.hidden = true;
   ui.input.disabled = true;
   ui.button.disabled = true;
-  [ui.mode, ui.paper, ui.colorMode].forEach(control => { control.disabled = true; });
+  [ui.mode, ui.paper].forEach(control => { control.disabled = true; });
   ui.drop.setAttribute('aria-busy', 'true');
   ui.progress.hidden = false;
   ui.progress.value = 0;
   try {
     ui.status.textContent = 'Loading Excel formatter…';
     const [, { transformWorkbook }] = await Promise.all([
-      library(), import('./engine.js?v=1.2.3')
+      library(), import('./engine.js?v=1.2.4')
     ]);
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -238,7 +238,7 @@ async function processFiles() {
       await yieldUi();
       let entry;
       try {
-        const result = await transformWorkbook(file.name, await file.arrayBuffer(), ui.mode.value, ui.paper.value, ui.colorMode.value);
+        const result = await transformWorkbook(file.name, await file.arrayBuffer(), ui.mode.value, ui.paper.value, 'static');
         entry = { report: result.report, data: result.data, outputName: outputNames[i] };
       } catch (error) {
         entry = {
@@ -260,12 +260,12 @@ async function processFiles() {
     processing = false;
     ui.input.disabled = false;
     ui.button.disabled = !selected.length;
-    [ui.mode, ui.paper, ui.colorMode].forEach(control => { control.disabled = false; });
+    [ui.mode, ui.paper].forEach(control => { control.disabled = false; });
     ui.drop.removeAttribute('aria-busy');
     refreshDownloadToolbar();
   }
 }
 ui.button.addEventListener('click', () => { void processFiles(); });
-for (const control of [ui.mode, ui.paper, ui.colorMode]) {
+for (const control of [ui.mode, ui.paper]) {
   control.addEventListener('change', () => { if (selected.length && !processing) void processFiles(); });
 }

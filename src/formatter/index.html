@@ -5,47 +5,66 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
   <title>BAC | PR Auto-Formatter</title>
-  <link rel="stylesheet" href="./styles.css">
-  <script src="./app.js?v=1.2.3" defer></script>
+  <link rel="stylesheet" href="./styles.css?v=1.2.4">
+  <script src="./app.js?v=1.2.4" defer></script>
 </head>
 <body>
-  <main class="wrap">
-    <nav class="nav" aria-label="BAC application"><span>BAC · Color &amp; Page Setup Fixer</span></nav>
-    <header>
-      <div class="overline">BIDS AND AWARDS COMMITTEE</div>
-      <h1>Color &amp; Page Setup Fixer</h1>
-      <p>Upload once, preview your formatted workbooks, and download individually or all together. Files stay on your device.</p>
+  <main class="app-shell">
+    <nav class="topbar" aria-label="BAC application">
+      <div class="brand"><span class="brand-mark">BAC</span><span>Procurement tools</span></div>
+      <span class="topbar-label">PR AUTO-FORMATTER</span>
+    </nav>
+
+    <header class="page-header">
+      <p class="eyebrow">PURCHASE REQUISITIONS</p>
+      <h1>PR Auto-Formatter</h1>
+      <p>Standardize bid rankings and page setup in Excel, with a clear preview before download.</p>
     </header>
-    <section class="panel" aria-label="Workbook formatter">
-      <div id="drop" class="drop" role="button" tabindex="0" aria-label="Choose Excel files or drop them here">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 16V4m0 0L7 9m5-5l5 5M4 17v3h16v-3"/></svg>
-        <strong>Drop Excel files here</strong><span>or click to choose .xlsx files — formatting starts automatically</span>
+
+    <section class="workspace" aria-label="Workbook formatter">
+      <div class="section-heading">
+        <div><h2>Upload workbooks</h2><p>Select one or more .xlsx files to begin automatically.</p></div>
+        <span class="local-note"><span class="local-dot" aria-hidden="true"></span>Processed on your device</span>
+      </div>
+
+      <div id="drop" class="dropzone" role="button" tabindex="0" aria-label="Choose Excel files or drop them here">
+        <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m0 0L7 9m5-5l5 5M4 17v3h16v-3"/></svg>
+        <strong>Drop Excel files here</strong>
+        <span>or click to browse <span aria-hidden="true">·</span> .xlsx <span aria-hidden="true">·</span> Multiple files supported</span>
         <input id="files" type="file" accept=".xlsx" multiple aria-label="Select purchase requisition workbooks">
       </div>
-      <div id="names" class="files">No Excel files selected</div>
+      <div id="names" class="selection-summary">No workbooks selected</div>
+
+      <div class="settings-heading"><h2>Formatting</h2><span>Applied to all selected workbooks</span></div>
       <div class="options">
-        <label>Bid classification
+        <label for="mode">Bid classification
           <select id="mode"><option value="auto">Auto detect</option><option value="line">Line Bid</option><option value="lot">Lot Bid</option></select>
         </label>
-        <label>Paper size
+        <label for="paper">Paper size
           <select id="paper"><option value="preserve">Keep original</option><option value="folio" selected>Folio</option><option value="legal">Legal</option><option value="a4">A4</option><option value="letter">Letter</option></select>
         </label>
-        <label>Color update mode
-          <select id="color-mode"><option value="static" selected>Standard colors — Windows & Mac (recommended)</option><option value="live">Dynamic colors — update automatically in Excel</option></select>
-        </label>
+        <div class="option-legend" aria-label="Bid ranking legend">
+          <strong>Legend</strong>
+          <div class="legend" role="list">
+            <span role="listitem"><i class="green" aria-hidden="true"></i>1st</span>
+            <span role="listitem"><i class="yellow" aria-hidden="true"></i>2nd</span>
+            <span role="listitem"><i class="orange" aria-hidden="true"></i>3rd</span>
+            <span role="listitem"><i class="pink" aria-hidden="true"></i>Above ABC</span>
+          </div>
+        </div>
       </div>
-      <button id="process" disabled>Reprocess selected workbooks</button>
+
+      <button id="process" class="reprocess" type="button" disabled hidden>Reprocess selected workbooks</button>
       <progress id="meter" value="0" max="100" hidden></progress>
       <div id="status" class="status" role="status" aria-live="polite"></div>
+
       <div id="downloads-toolbar" class="downloads-toolbar" hidden>
-        <div class="download-summary">
-          <strong>Formatted workbooks</strong>
-          <span id="download-count"></span>
-        </div>
+        <div class="download-summary"><strong>Formatted workbooks</strong><span id="download-count"></span></div>
         <button id="download-all" class="download-all" type="button" disabled>Download All (.zip)</button>
       </div>
       <div id="results" class="results" aria-live="polite"></div>
     </section>
+
     <dialog id="preview-dialog" class="preview-dialog" aria-labelledby="preview-title" aria-describedby="preview-meta">
       <div class="preview-modal">
         <header class="preview-header">
@@ -63,13 +82,13 @@
         </footer>
       </div>
     </dialog>
-    <section class="details">
-      <h2>Automatic legend</h2>
-      <div class="legend"><span><i class="green"></i>1st</span><span><i class="yellow"></i>2nd</span><span><i class="orange"></i>3rd</span><span><i class="pink"></i>Above ABC</span></div>
-      <p><strong>Line Bid</strong> ranks each item separately; <strong>Lot Bid</strong> ranks the total lot amount. Equal amounts share the same rank. Standard colors use normal Excel cell fills on Windows and Mac. They remain fixed until you reprocess the workbook after editing prices. Dynamic colors use Excel conditional formatting to update when prices change.</p>
-      <p class="privacy">Processing runs only in your browser. No upload, accounts, server processing, or persistent workbook storage. For an uncertain bid classification, select Line Bid or Lot Bid explicitly. Review the formatted Excel before using it for procurement decisions.</p>
+
+    <section class="details" aria-label="About the formatter">
+      <h2>How it works</h2>
+      <p><strong>Line Bid</strong> ranks prices for each item; <strong>Lot Bid</strong> ranks the total lot amount. Equal prices share a rank. Standard Excel colors are applied for compatibility with Windows and Mac. Reprocess after changing bid prices to refresh the colors.</p>
+      <p class="privacy">Workbooks are processed in your browser, not uploaded or stored on a server. Confirm bid classification and review each formatted workbook before use.</p>
     </section>
-    <footer>BAC Color &amp; Page Setup Fixer · Private, in-browser processing</footer>
+    <footer class="site-footer"><span>BAC · PR Auto-Formatter</span><span>Private, browser-based formatting</span></footer>
   </main>
 </body>
 </html>
