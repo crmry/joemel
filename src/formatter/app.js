@@ -48,7 +48,8 @@ function formatNames(files) {
 }
 function choose(files) {
   if (processing) return;
-  selected = [...files].filter(f => /\.xlsx$/i.test(f.name) && !f.name.startsWith('~$'))
+  // Keep invalid dropped files in the results so rejection reasons are visible.
+  selected = [...files].filter(f => f && typeof f.name === 'string')
     .sort((a, b) => sequence(a.name) - sequence(b.name) || a.name.localeCompare(b.name, undefined, { numeric: true }));
   entries = [];
   ui.names.textContent = selected.length
@@ -126,7 +127,7 @@ function addResult(entry, index) {
   } else {
     const warning = document.createElement('span');
     warning.className = 'result-error';
-    warning.textContent = 'Not converted';
+    warning.textContent = 'Rejected';
     item.append(warning);
   }
   ui.results.append(item);
@@ -229,16 +230,21 @@ async function processFiles() {
   ui.progress.value = 0;
   try {
     ui.status.textContent = 'Loading Excel formatter…';
-    const [, { transformWorkbook }] = await Promise.all([
-      library(), import('./engine.js?v=1.2.4')
+    const [, { transformWorkbook }, { uploadIssue, archiveIssue }] = await Promise.all([
+      library(), import('./engine.js?v=1.2.9'), import('./upload-validation.js?v=1.2.9')
     ]);
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      ui.status.textContent = `Formatting ${i + 1} of ${files.length}: ${file.name}`;
+      ui.status.textContent = `Checking ${i + 1} of ${files.length}: ${file.name}`;
       await yieldUi();
       let entry;
       try {
-        const result = await transformWorkbook(file.name, await file.arrayBuffer(), ui.mode.value, ui.paper.value, 'static');
+        const issue = uploadIssue(file);
+        if (issue) throw Error(issue);
+        const buffer = await file.arrayBuffer();
+        const invalidArchive = archiveIssue(buffer);
+        if (invalidArchive) throw Error(invalidArchive);
+        const result = await transformWorkbook(file.name, buffer, ui.mode.value, ui.paper.value, 'static');
         entry = { report: result.report, data: result.data, outputName: outputNames[i] };
       } catch (error) {
         entry = {
@@ -252,8 +258,8 @@ async function processFiles() {
       refreshDownloadToolbar();
     }
     const converted = entries.filter(entry => entry.data).length;
-    const review = entries.filter(entry => entry.report.mode === 'REVIEW REQUIRED').length;
-    ui.status.textContent = `${converted} of ${files.length} workbooks ready. Preview or download individually, or choose Download All.${review ? ' ' + review + ' require classification review.' : ''}`;
+    const rejected = entries.filter(entry => !entry.data).length;
+    ui.status.textContent = `${converted} ready · ${rejected} rejected. ${converted ? 'Preview or download accepted workbooks.' : 'No workbooks were accepted.'}${rejected ? ' Rejected files are excluded from downloads; see reasons above.' : ''}`;
   } catch (error) {
     ui.status.textContent = 'Could not process files: ' + (error.message || String(error));
   } finally {

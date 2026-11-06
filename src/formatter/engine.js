@@ -439,9 +439,55 @@ const FIXED_PAGE_SETUP=Object.freeze({
   header:'original',
   footer:'original'
 });
+// Only workbooks matching the supported BAC abstract-of-bids structure may
+// proceed. These checks are based on the original BAC sample workbooks and
+// do not require any particular filename or procurement year.
+function validateBacTemplate(cells,shared,cols,items,totals,footer){
+  const label=ref=>readString(cells.get(ref),shared).trim().toUpperCase().replace(/\s+/g,' ');
+  const required=[
+    ['B10','SUPPLIER','supplier heading at B10'],
+    ['A12','ITEM','item heading at A12'],
+    ['B12','NAME OF ARTICLES','article heading at B12'],
+    ['E12','ABC','ABC heading at E12']
+  ];
+  for(const [ref,text,description] of required){
+    if(!label(ref).includes(text))throw Error('Not a supported BAC abstract-of-bids template: missing '+description+'.');
+  }
+  if(!cols.length)throw Error('Not a supported BAC abstract-of-bids template: supplier TOTAL COST columns are missing from row 12.');
+  if(!items.length)throw Error('This workbook has no numbered bidding items starting at row 14.');
+
+  // Never silently drop an item because its ABC cell was deleted.
+  const numberedRows=[...cells].filter(([ref,cell])=>{
+    if(!/^A\d+$/.test(ref))return false;
+    const row=Number(ref.slice(1));
+    return row>=14&&row<footer&&/^\d+(?:\.0+)?$/.test(readString(cell,shared).trim());
+  }).map(([ref])=>Number(ref.slice(1)));
+  const missing=numberedRows.find(row=>!cells.has('E'+row));
+  if(missing)throw Error('Item row '+missing+' is missing its ABC amount at E'+missing+'.');
+
+  for(const row of items){
+    const budget=label('E'+row);
+    if(!budget||!Number.isFinite(Number(budget))||Number(budget)<=0)
+      throw Error('Invalid ABC amount at E'+row+'. Enter a positive numeric budget and save the workbook.');
+  }
+  for(const col of cols){
+    const nameCell=columnName(colNumber(col)-1)+'11';
+    if(!label(nameCell))throw Error('Supplier name is missing at '+nameCell+'.');
+  }
+  // Empty or uncalculated prices cannot safely produce a bidding ranking.
+  const hasBid=[...new Set([...items,...totals])].some(row=>cols.some(col=>{
+    const amount=label(col+row);
+    return amount!==''&&Number.isFinite(Number(amount))&&Number(amount)>0;
+  }));
+  if(!hasBid)throw Error('No numeric supplier bid amounts were found. Check the bid prices and saved formula results in Excel.');
+}
+
 export async function transformWorkbook(name,buffer,mode,paper,colorMode="static"){
-  const zip=await window.JSZip.loadAsync(buffer);
-  for(const path of ['xl/workbook.xml','xl/styles.xml','xl/worksheets/sheet1.xml'])if(!zip.file(path))throw Error('Unsupported BAC template: '+path+' missing');
+  let zip;
+  try{zip=await window.JSZip.loadAsync(buffer);}
+  catch{throw Error('The Excel workbook is damaged or unreadable. Re-save it as an .xlsx file and try again.');}
+  for(const path of ['[Content_Types].xml','xl/workbook.xml','xl/styles.xml','xl/worksheets/sheet1.xml'])
+    if(!zip.file(path))throw Error('This file is not a supported .xlsx workbook. Encrypted or incomplete Excel files cannot be processed.');
   const [workbookText,stylesText,sheetText,sharedText]=await Promise.all([
     zip.file('xl/workbook.xml').async('string'),zip.file('xl/styles.xml').async('string'),zip.file('xl/worksheets/sheet1.xml').async('string'),
     zip.file('xl/sharedStrings.xml')?.async('string')||Promise.resolve(null)
@@ -449,8 +495,9 @@ export async function transformWorkbook(name,buffer,mode,paper,colorMode="static
   const wb=parse(workbookText,'workbook'),styles=parse(stylesText,'styles'),sheet=parse(sheetText,'sheet1');
   const shared=sharedText?findByName(parse(sharedText,'shared strings'),'si').map(n=>n.textContent||''):[];
   const cells=new Map(findByName(sheet,'sheetData').flatMap(data=>findByName(data,'c')).map(c=>[c.getAttribute('r'),c]));
-  const cols=getBidCols(cells,shared);if(!cols.length)throw Error('No supplier TOTAL COST columns in row 12');
-  const {footer,items,totals}=findRows(cells,shared,cols);if(!items.length)throw Error('No numbered line items found');
+  const cols=getBidCols(cells,shared);
+  const {footer,items,totals}=findRows(cells,shared,cols);
+  validateBacTemplate(cells,shared,cols,items,totals,footer);
   const fills=children(child(styles.documentElement,'fills'),'fill');
   const xfs=children(child(styles.documentElement,'cellXfs'),'xf');
   const meta=inferMode(wb,cells,shared,cols,items,totals,xfs,fills,filenameNumber(name),mode,sheet,name);

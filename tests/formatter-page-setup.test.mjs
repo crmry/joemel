@@ -70,3 +70,14 @@ test('Product identity consistently uses Purchase Request (PR) Formatting Tool',
   assert.ok(html.includes('BAC · ' + label));
   assert.doesNotMatch(html, /PR Auto-Formatter/);
 });
+
+test('File validation runs before a workbook can become downloadable', () => {
+  assert.match(app, /uploadIssue\(file\)/);
+  assert.match(app, /archiveIssue\(buffer\)/);
+  assert.match(app, /Rejected files are excluded from downloads/);
+  assert.match(app, /warning\.textContent = 'Rejected'/);
+  assert.match(engine, /validateBacTemplate\(cells,shared,cols,items,totals,footer\)/);
+  assert.match(engine, /supplier TOTAL COST columns are missing/);
+  assert.match(engine, /Invalid ABC amount at E/);
+  assert.match(engine, /No numeric supplier bid amounts were found/);
+});
