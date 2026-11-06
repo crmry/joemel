@@ -16,6 +16,8 @@ The homepage opens the formatter directly at https://crmry.github.io/joemel/form
 6. Files are **formatted automatically upon upload**. Downloads use the **original uploaded `.xlsx` filenames** (no added `_formatted` suffix); duplicate filenames receive a number to avoid conflicts. Each successful result has a **Preview** action and its own **Download** button. Review its rendered worksheet before saving it.
 7. Click **Download All (.zip)** to save all successfully formatted workbooks plus the processing report. **Reprocess selected workbooks** can be used after changing settings.
 
+The four legend badges now have brief tooltips on hover, focus, or tap. The **How it works** area gives a concise Upload → Review → Download workflow.
+
 The preview is a read-only worksheet representation showing cell values, merged cells and standard fill colors. It is **not a print-accurate representation of Excel**, and is limited to the first 65 rows and 32 columns. Users should confirm final pagination in Excel's Page Layout before printing.
 
 The formatter preserves worksheet values, formulas, merged cells and existing layout; configures the print area, 70% scaling, and landscape orientation; and applies the legend: **1st (green), 2nd (yellow), 3rd (orange), Above ABC (pink)**. Line Bids rank by item, while Lot Bids rank on lot totals. Equal amounts share the same rank.

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
   <title>BAC | PR Auto-Formatter</title>
-  <link rel="stylesheet" href="./styles.css?v=1.2.4">
+  <link rel="stylesheet" href="./styles.css?v=1.2.5">
   <script src="./app.js?v=1.2.4" defer></script>
 </head>
 <body>
@@ -46,10 +46,10 @@
         <div class="option-legend" aria-label="Bid ranking legend">
           <strong>Legend</strong>
           <div class="legend" role="list">
-            <span role="listitem"><i class="green" aria-hidden="true"></i>1st</span>
-            <span role="listitem"><i class="yellow" aria-hidden="true"></i>2nd</span>
-            <span role="listitem"><i class="orange" aria-hidden="true"></i>3rd</span>
-            <span role="listitem"><i class="pink" aria-hidden="true"></i>Above ABC</span>
+            <span role="listitem"><button type="button" class="legend-chip" aria-label="First rank: lowest bid amount within the Approved Budget for the Contract" data-tooltip="Lowest bid within the ABC"><i class="green" aria-hidden="true"></i>1st</button></span>
+            <span role="listitem"><button type="button" class="legend-chip" aria-label="Second rank: second-lowest bid amount within the Approved Budget for the Contract" data-tooltip="Second-lowest bid within the ABC"><i class="yellow" aria-hidden="true"></i>2nd</button></span>
+            <span role="listitem"><button type="button" class="legend-chip" aria-label="Third rank: third-lowest bid amount within the Approved Budget for the Contract" data-tooltip="Third-lowest bid within the ABC"><i class="orange" aria-hidden="true"></i>3rd</button></span>
+            <span role="listitem"><button type="button" class="legend-chip" aria-label="Above ABC: bid amount exceeds the Approved Budget for the Contract" data-tooltip="Bid exceeds the Approved Budget for the Contract"><i class="pink" aria-hidden="true"></i>Above ABC</button></span>
           </div>
         </div>
       </div>
@@ -83,10 +83,14 @@
       </div>
     </dialog>
 
-    <section class="details" aria-label="About the formatter">
-      <h2>How it works</h2>
-      <p><strong>Line Bid</strong> ranks prices for each item; <strong>Lot Bid</strong> ranks the total lot amount. Equal prices share a rank. Standard Excel colors are applied for compatibility with Windows and Mac. Reprocess after changing bid prices to refresh the colors.</p>
-      <p class="privacy">Workbooks are processed in your browser, not uploaded or stored on a server. Confirm bid classification and review each formatted workbook before use.</p>
+    <section class="details" aria-labelledby="how-it-works-title">
+      <h2 id="how-it-works-title">How it works</h2>
+      <ol class="workflow-steps">
+        <li><span class="step-number">01</span><div><strong>Upload</strong><p>Add one or more Excel workbooks. Formatting starts automatically in your browser.</p></div></li>
+        <li><span class="step-number">02</span><div><strong>Review</strong><p>Check the ranking colors and preview. Line Bid compares items; Lot Bid compares total amounts.</p></div></li>
+        <li><span class="step-number">03</span><div><strong>Download</strong><p>Save each workbook separately or download everything as a ZIP. Reprocess after price changes.</p></div></li>
+      </ol>
+      <p class="workflow-note">Standard colors and 70% landscape scaling are applied automatically. Files stay on your device. Confirm bid results against the procurement documents before use.</p>
     </section>
     <footer class="site-footer"><span>BAC · PR Auto-Formatter</span><span>Private, browser-based formatting</span></footer>
   </main>

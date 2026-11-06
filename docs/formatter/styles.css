@@ -106,3 +106,25 @@ progress{width:100%;height:7px;margin-top:18px;accent-color:#246da8}
  .preview-footer{padding:13px 16px;gap:12px}
  .site-footer{flex-direction:column;gap:5px}
 }
+
+/* Accessible, lightweight tooltips for the ranking legend. */
+.legend>span{position:relative;padding:0;border:0;background:transparent}
+.legend-chip{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border:1px solid #e2e8ef;border-radius:7px;background:#fafcff;color:#33465a;font-size:12px;font-weight:650;line-height:1.3;cursor:help}
+.legend-chip:hover,.legend-chip:focus{border-color:#b3c9dc;background:#f2f8fe}
+.legend-chip:focus-visible{outline:2px solid #5291c5;outline-offset:2px}
+.legend-chip:after{content:attr(data-tooltip);position:absolute;z-index:10;left:50%;bottom:calc(100% + 10px);transform:translate(-50%,4px);width:max-content;max-width:min(230px,calc(100vw - 50px));padding:8px 11px;border-radius:7px;background:#243950;color:#fff;box-shadow:0 5px 18px #10274024;text-align:left;white-space:normal;font-size:12px;line-height:1.5;font-weight:500;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .12s ease,transform .12s ease}
+.legend-chip:hover:after,.legend-chip:focus:after{opacity:1;visibility:visible;transform:translate(-50%,0)}
+.legend>span:first-child .legend-chip:after,.legend>span:nth-child(2) .legend-chip:after{left:0;transform:translateY(4px)}
+.legend>span:first-child .legend-chip:hover:after,.legend>span:first-child .legend-chip:focus:after,.legend>span:nth-child(2) .legend-chip:hover:after,.legend>span:nth-child(2) .legend-chip:focus:after{transform:translateY(0)}
+.legend>span:last-child .legend-chip:after{left:auto;right:0;transform:translateY(4px)}
+.legend>span:last-child .legend-chip:hover:after,.legend>span:last-child .legend-chip:focus:after{transform:translateY(0)}
+/* Brief, scannable three-step usage guide. */
+.details{padding:26px 2px 0}
+.details h2{margin:0 0 16px}
+.workflow-steps{list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin:0;padding:20px 0 18px;border-top:1px solid var(--line)}
+.workflow-steps li{display:flex;gap:10px;align-items:flex-start;min-width:0}
+.step-number{color:#47769c;font-size:11px;font-weight:800;letter-spacing:.05em}
+.workflow-steps strong{font-size:12px;color:#253d58;font-weight:750}
+.workflow-steps p{font-size:12px;line-height:1.65;color:#677b90;margin:5px 0 0}
+.workflow-note{font-size:11px;line-height:1.7;color:#7b8b9b;border-top:1px solid #e7edf3;padding:12px 0 0;margin:0}
+@media(max-width:640px){.workflow-steps{grid-template-columns:1fr;gap:16px}}

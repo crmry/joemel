@@ -1,6 +1,6 @@
 {
   "name": "bac-pr-color-page-formatter",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "private": true,
   "type": "module",
   "description": "Browser-only color and page setup formatter for BAC abstract-of-bids workbooks.",
