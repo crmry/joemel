@@ -1,4 +1,4 @@
-# BAC Color & Page Setup Fixer
+# BAC PR Auto-Formatter
 
 A single, browser-based Excel formatter for BAC abstract-of-bids purchase requisitions. The separate Bid Basis Checker page has been retired because Line Bid / Lot Bid recognition is already part of the formatter.
 
