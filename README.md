@@ -14,13 +14,13 @@ The homepage opens the formatter directly at https://crmry.github.io/joemel/form
 4. Choose a color mode:
    - **Standard colors (Windows & Mac)** (default): writes ordinary visible Excel cell fills that work across both desktop platforms. Re-run formatting after changing bid amounts because the colors remain fixed.
    - **Dynamic colors:** uses conditional formatting so rankings update when bid amounts change. Display behavior may differ between Excel versions; verify the output.
-5. Choose **Page Setup** options: **Fit to 1 page wide** (default) or **Adjust to a percentage**, portrait/landscape, and Header/Footer selections. Folio and the original workbook layout remain supported. Old cached printer settings are unlinked to avoid overriding the chosen settings.
+5. **Page Setup is hidden and automatic**: all workbooks use **Adjust to 70%**, **Landscape**, and **Keep original** for headers and footers. Paper size still defaults to Folio, and obsolete cached printer settings are unlinked.
 6. Files are **formatted automatically upon upload**. Downloads use the **original uploaded `.xlsx` filenames** (no added `_formatted` suffix); duplicate filenames receive a number to avoid conflicts. Each successful result has a **Preview** action and its own **Download** button. Review its rendered worksheet before saving it.
 7. Click **Download All (.zip)** to save all successfully formatted workbooks plus the processing report. **Reprocess selected workbooks** can be used after changing settings.
 
 The preview is a read-only worksheet representation showing cell values, merged cells and standard fill colors. It is **not a print-accurate representation of Excel**, and is limited to the first 65 rows and 32 columns. Users should confirm final pagination in Excel's Page Layout before printing.
 
-The formatter preserves worksheet values, formulas, merged cells and existing layout; configures the print area and chosen scaling (Fit to Width or Adjust to %); and applies the legend: **1st (green), 2nd (yellow), 3rd (orange), Above ABC (pink)**. Line Bids rank by item, while Lot Bids rank on lot totals. Equal amounts share the same rank.
+The formatter preserves worksheet values, formulas, merged cells and existing layout; configures the print area, 70% scaling, and landscape orientation; and applies the legend: **1st (green), 2nd (yellow), 3rd (orange), Above ABC (pink)**. Line Bids rank by item, while Lot Bids rank on lot totals. Equal amounts share the same rank.
 
 All workbook data stays on the visitor's device and is processed in browser memory. No backend upload, database, or persistent file storage is used. Excel processing code loads only when formatting is requested.
 

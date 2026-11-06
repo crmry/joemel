@@ -431,7 +431,15 @@ function serializePatchedSheet(original,doc,updates){
   return xml;
 }
 
-export async function transformWorkbook(name,buffer,mode,paper,colorMode="static",pageOptions={}){
+// Every processed BAC PR workbook uses the same hidden Excel print defaults.
+const FIXED_PAGE_SETUP=Object.freeze({
+  scaling:'adjust',
+  scalePercent:70,
+  orientation:'landscape',
+  header:'original',
+  footer:'original'
+});
+export async function transformWorkbook(name,buffer,mode,paper,colorMode="static"){
   const zip=await window.JSZip.loadAsync(buffer);
   for(const path of ['xl/workbook.xml','xl/styles.xml','xl/worksheets/sheet1.xml'])if(!zip.file(path))throw Error('Unsupported BAC template: '+path+' missing');
   const [workbookText,stylesText,sheetText,sharedText]=await Promise.all([
@@ -460,7 +468,7 @@ export async function transformWorkbook(name,buffer,mode,paper,colorMode="static
   }
   const lastCol=columnName(Math.max(colNumber(cols[cols.length-1]),5));
   const sheetname=child(wb.documentElement,'sheets')?child(child(wb.documentElement,'sheets'),'sheet')?.getAttribute('name')||'Sheet1':'Sheet1';
-  const area=configurePrint(sheet,wb,sheetname,lastCol,lastRow,paper,pageOptions);
+  const area=configurePrint(sheet,wb,sheetname,lastCol,lastRow,paper,FIXED_PAGE_SETUP);
   let rules=0,cleared=0,staticColors=0,verifiedColors=0,uncached=0,styleUpdates=new Map();
   if(meta.mode){
     const fallback=applyStaticFallback(cells,styles,xfs,fills,cols,items,targets,meta.mode,shared);
